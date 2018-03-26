@@ -1,0 +1,11 @@
+menu "MenU8G2 Config"
+
+config MAX_DEPTH
+    int
+    prompt "Maximum menu depth. I.E. how large the menuing stack size is"
+    default 6
+    help
+        A lower value uses less memory, but a higher value allows you to have 
+        deeper submenus.
+
+endmenu
