@@ -7,6 +7,12 @@ https://github.com/olikraus/u8g2
 
 By default, you should clone these components into $(IDF_PATH/../third-party-components)
 
+# Unit Tests
+```
+git clone https://github.com/BrianPugh/esp32_unit_tester
+```
+And follow that git's readme
+
 # Todo:
 * Move button stuff in test/ to its own "inputs" component
 * Make the button code a little bit more general
