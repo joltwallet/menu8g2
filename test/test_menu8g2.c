@@ -15,6 +15,9 @@
 
 #include "buttons.h"
 
+volatile u8g2_t u8g2;
+volatile QueueHandle_t input_queue;
+
 /* Configure this to your test screen to see results */
 static void setup_screen(u8g2_t *u8g2){
     // Initialize OLED Screen I2C params
@@ -42,9 +45,17 @@ static void setup_screen(u8g2_t *u8g2){
     u8g2_SetContrast(u8g2, 255);
 }
 
+TEST_CASE("Setup", "[menu8g2]"){
+    setup_screen(&u8g2);
+
+    setup_buttons();
+    input_queue = xQueueCreate(5, sizeof(char));
+    xTaskCreate(vButtonDebounceTask, "ButtonDebounce", 1024,
+            (void *)&input_queue, 20, NULL);
+}
+
 TEST_CASE("Basic Vertical Menu", "[menu8g2]"){
-    // Create Screen Object
-    const char title[] = "Test App Title";
+    const char title[] = "Basic Vertical Menu";
     const char *options[] = {
         "alpha",
         "beta",
@@ -56,17 +67,37 @@ TEST_CASE("Basic Vertical Menu", "[menu8g2]"){
         "theta",
         "iota"
     };
-    u8g2_t u8g2;
-    setup_screen(&u8g2);
-
-    setup_buttons();
-    QueueHandle_t input_queue = xQueueCreate(5, sizeof(char));
-    xTaskCreate(vButtonDebounceTask, "ButtonDebounce", 1024,
-            (void *)&input_queue, 20, NULL);
 
     menu8g2_t menu;
     menu8g2_init(&menu, &u8g2, input_queue);
 
     bool res = menu8g2_create_simple(&menu, title, options, 9);
+    if(res==false){
+        printf("Menu exited by pressing BACK.\n");
+    }
+    else{
+        printf("Menu exited by pressing ENTER.\n");
+    }
 }
 
+static menu8g2_err_t squarer(char buf[], const char *options[], const uint32_t index){
+    sprintf(buf, "sqr: %d", index*index);
+    return E_SUCCESS;
+}
+
+TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){
+    const char title[] = "OTF Vert Menu Max:20";
+    menu8g2_t menu;
+    menu8g2_init(&menu, &u8g2, input_queue);
+
+    bool res = menu8g2_create_vertical_menu(&menu, title, NULL,
+            (void *)&squarer, 20);
+
+    if(res==false){
+        printf("Menu exited by pressing BACK.\n");
+    }
+    else{
+        printf("Menu exited by pressing ENTER.\n");
+    }
+
+}
