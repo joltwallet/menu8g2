@@ -45,7 +45,7 @@ static void setup_screen(u8g2_t *u8g2){
     u8g2_SetContrast(u8g2, 255);
 }
 
-TEST_CASE("Setup", "[menu8g2]"){
+TEST_CASE("MUST RUN FIRST: Setup", "[menu8g2]"){
     setup_screen(&u8g2);
 
     setup_buttons();
@@ -101,3 +101,136 @@ TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){
     }
 
 }
+
+static void animal_menu(menu8g2_t *prev){
+    bool res;
+    menu8g2_t menu;
+    menu8g2_init(&menu,
+            menu8g2_get_u8g2(prev),
+            menu8g2_get_input_queue(prev));
+
+    const char title[] = "Animal Menu";
+    const char *options[] = {
+        "Cat",
+        "Dog",
+        "Bird",
+        "Fish",
+        "Mouse",
+        "Pig",
+        "Cow",
+        "Chicken",
+        "Goat",
+        "Turtle"
+    };
+    do{
+        res = menu8g2_create_simple(&menu, title, options, 10);
+        if(res==true){
+            switch(menu8g2_get_index(&menu)){
+                case 0:
+                    menu8g2_display_text(&menu, "Meow");
+                    break;
+                case 1:
+                    menu8g2_display_text(&menu, "Woof");
+                    break;
+                case 2:
+                     menu8g2_display_text(&menu, "Chirp");
+                     break;
+                case 3:
+                     menu8g2_display_text(&menu, "Blub");
+                     break;
+                case 4:
+                     menu8g2_display_text(&menu, "Squeak");
+                     break;
+                case 5:
+                     menu8g2_display_text(&menu, "Oink");
+                     break;
+                case 6:
+                     menu8g2_display_text(&menu, "Mooooooooooooooooooooooooooooo");
+                     break;
+                case 7:
+                     menu8g2_display_text(&menu, "Cock-a-doodle-doooooooooooooooo");
+                     break;
+                case 8:
+                     menu8g2_display_text(&menu, "baaaaaaaaaa");
+                     break;
+                case 9:
+                     menu8g2_display_text(&menu, "I like turtles");
+                     break;
+            }
+        }
+    }while(res==true);
+    return;
+}
+
+static void crypto_menu(menu8g2_t *prev){
+    bool res;
+    menu8g2_t menu;
+    menu8g2_init(&menu,
+            menu8g2_get_u8g2(prev),
+            menu8g2_get_input_queue(prev));
+
+    const char title[] = "Crypto Menu";
+    const char *options[] = {
+        "Bitcoin",
+        "Ethereum",
+        "Monero",
+        "Nano",
+        "Iota",
+        "NEO",
+    };
+    do{
+        res = menu8g2_create_simple(&menu, title, options, 6);
+        if(res==true){
+            switch(menu8g2_get_index(&menu)){
+                case 0:
+                case 5:
+                    menu8g2_display_text(&menu, "SHA256D, RIPEMD160");
+                    break;
+                case 1:
+                    menu8g2_display_text(&menu, "Ethash");
+                    break;
+                case 2:
+                     menu8g2_display_text(&menu, "CryptoNote");
+                     break;
+                case 3:
+                     menu8g2_display_text(&menu, "Blake2b");
+                     break;
+                case 4:
+                     menu8g2_display_text(&menu, "Curl");
+                     break;
+            }
+        }
+    }while(res==true);
+    return;
+}
+
+TEST_CASE("Basic Stack Menu", "[menu8g2]"){
+    const char title[] = "Basic Stack Menu";
+    const char *options[] = {
+        "Animals",
+        "Cryptocurrencies"
+    };
+
+    menu8g2_t menu;
+    menu8g2_init(&menu, &u8g2, input_queue);
+
+    bool res;
+    do{
+        res = menu8g2_create_simple(&menu, title, options, 2);
+        if(res==true){
+            switch(menu8g2_get_index(&menu)){
+                case 0:
+                    animal_menu(&menu);
+                    break;
+                case 1:
+                    crypto_menu(&menu);
+                    break;
+            }
+        }
+        else{
+            printf("Menu exited by pressing BACK.\n");
+        }
+
+    }while(res == true);
+}
+

@@ -10,7 +10,6 @@
 
 menu8g2_err_t menu8g2_init(menu8g2_t *menu, u8g2_t *u8g2,
         QueueHandle_t *input_queue){
-    menu->prev = NULL;
     menu->u8g2 = u8g2;
     menu->input_queue = input_queue;
     menu->index = 0;
@@ -27,10 +26,14 @@ uint32_t menu8g2_get_index(menu8g2_t *menu){
     return menu->index;
 }
 
-menu8g2_err_t menu8g2_set_prev(menu8g2_t *menu, menu8g2_t *prev){
-    menu->prev = prev;
-    return E_SUCCESS;
+QueueHandle_t *menu8g2_get_input_queue(menu8g2_t *menu){
+    return menu->input_queue;
 }
+
+u8g2_t *menu8g2_get_u8g2(menu8g2_t *menu){
+    return menu->u8g2;
+}
+
 
 #define BORDER_SIZE 1
 #define LINE_BUFFER_SIZE 80
@@ -139,5 +142,43 @@ bool menu8g2_create_simple(menu8g2_t *menu,
         ){
     return menu8g2_create_vertical_menu(menu, title, options,
             &linear_string_selector, options_len);
+}
+
+menu8g2_err_t menu8g2_display_text(menu8g2_t *menu, const char *text){
+    /* Wraps text to fit on the dispaly; need to add scrolling */
+    uint8_t item_height; // Height of a menu item
+	uint8_t input_buf; // holds the incoming button presses
+
+    u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
+    item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + BORDER_SIZE;
+
+    uint16_t str_len = strlen(text);
+    uint16_t n_lines = 1 + ((str_len - 1) / CHAR_PER_LINE_WRAP);
+    char buf[CHAR_PER_LINE_WRAP+1];
+
+    u8g2_FirstPage(menu->u8g2);
+    do{
+        for(int i=0; i<n_lines; i++){
+            strncpy(buf, text+i*CHAR_PER_LINE_WRAP, CHAR_PER_LINE_WRAP);
+            buf[CHAR_PER_LINE_WRAP] = '\0';
+            u8g2_DrawStr(menu->u8g2, 0, item_height + i*item_height, buf);
+        }
+    } while(u8g2_NextPage(menu->u8g2));
+
+    // Block until user inputs a button
+    for(;;){
+        if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
+            if(input_buf & (0x01 << LEFT)){
+                return E_SUCCESS;
+            }
+            else if(input_buf & (0x01 << UP)){
+            }
+            else if(input_buf & (0x01 << DOWN)){
+            }
+            else if(input_buf & (0x01 << ENTER)){
+            }
+        }
+    }
+    return E_FAILURE;
 }
 

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+#include "u8g2.h"
 #include "menu8g2.h"
 #include "helpers.h"
 
