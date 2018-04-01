@@ -13,13 +13,15 @@
 #include "u8g2_esp32_hal.h"
 #include "esp32_1306.h"
 
-#include "buttons.h"
-
 u8g2_t u8g2;
-QueueHandle_t input_queue;
+
+bool display_initialized = false;
 
 /* Configure this to your test screen to see results */
 static void setup_screen(u8g2_t *u8g2){
+    if (display_initialized){
+        return;
+    }
     // Initialize OLED Screen I2C params
 	u8g2_esp32_hal_t u8g2_esp32_hal = U8G2_ESP32_HAL_DEFAULT;
 	u8g2_esp32_hal.sda  = SCREEN_PIN_SDA;
@@ -43,18 +45,20 @@ static void setup_screen(u8g2_t *u8g2){
 	u8g2_ClearBuffer(u8g2);
 
     u8g2_SetContrast(u8g2, 255);
-}
 
-TEST_CASE("MUST RUN FIRST: Setup", "[menu8g2]"){
-    setup_screen(&u8g2);
-
-    setup_buttons();
-    input_queue = xQueueCreate(5, sizeof(char));
-    xTaskCreate(vButtonDebounceTask, "ButtonDebounce", 1024,
-            (void *)&input_queue, 20, NULL);
+    display_initialized = true;
 }
 
 TEST_CASE("Basic Vertical Menu", "[menu8g2]"){
+    setup_screen(&u8g2);
+    QueueHandle_t input_queue;
+    easy_input_queue_init(&input_queue);
+    TaskHandle_t h_push_button = NULL;
+    xTaskCreate(easy_input_push_button_task, \
+            "ButtonDebounce", 2048,
+            (void *)&input_queue, 20, \
+            &h_push_button);
+
     const char title[] = "Basic Vertical Menu";
     const char *options[] = {
         "alpha",
@@ -78,6 +82,7 @@ TEST_CASE("Basic Vertical Menu", "[menu8g2]"){
     else{
         printf("Menu exited by pressing ENTER.\n");
     }
+    vTaskDelete(h_push_button);
 }
 
 static menu8g2_err_t squarer(char buf[], size_t buf_len, const char *options[], const uint32_t index){
@@ -86,6 +91,15 @@ static menu8g2_err_t squarer(char buf[], size_t buf_len, const char *options[], 
 }
 
 TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){
+    setup_screen(&u8g2);
+    QueueHandle_t input_queue;
+    easy_input_queue_init(&input_queue);
+    TaskHandle_t h_push_button = NULL;
+    xTaskCreate(easy_input_push_button_task, \
+            "ButtonDebounce", 2048,
+            (void *)&input_queue, 20, \
+            &h_push_button);
+
     const char title[] = "OTF Vert Menu Max:20";
     menu8g2_t menu;
     menu8g2_init(&menu, &u8g2, input_queue);
@@ -100,6 +114,7 @@ TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){
         printf("Menu exited by pressing ENTER.\n");
     }
 
+    vTaskDelete(h_push_button);
 }
 
 static void animal_menu(menu8g2_t *prev){
@@ -205,6 +220,15 @@ static void crypto_menu(menu8g2_t *prev){
 }
 
 TEST_CASE("Basic Stack Menu", "[menu8g2]"){
+    setup_screen(&u8g2);
+    QueueHandle_t input_queue;
+    easy_input_queue_init(&input_queue);
+    TaskHandle_t h_push_button = NULL;
+    xTaskCreate(easy_input_push_button_task, \
+            "ButtonDebounce", 2048,
+            (void *)&input_queue, 20, \
+            &h_push_button);
+
     const char title[] = "Basic Stack Menu";
     const char *options[] = {
         "Animals",
@@ -232,5 +256,6 @@ TEST_CASE("Basic Stack Menu", "[menu8g2]"){
         }
 
     }while(res == true);
+    vTaskDelete(h_push_button);
 }
 

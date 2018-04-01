@@ -4,6 +4,7 @@
 #include "u8g2.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "easy_input.h"
 
 #define CHAR_PER_LINE_WRAP 20
 
@@ -12,9 +13,6 @@ typedef enum menu8g2_err_t{
     E_FAILURE
 } menu8g2_err_t;
 
-typedef enum buttons{
-    UP, DOWN, LEFT, RIGHT, ENTER, NUMBER_OF_BUTTON_TYPES
-} buttons_t;
 
 //typedef struct menu8g2_t menu8g2_t;
 typedef struct menu8g2_t{

@@ -6,6 +6,7 @@
 
 #include "u8g2.h"
 #include "menu8g2.h"
+#include "easy_input.h"
 #include "helpers.h"
 
 menu8g2_err_t menu8g2_init(menu8g2_t *menu, u8g2_t *u8g2,
@@ -94,7 +95,6 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                     break; // No more options to display
                 }
                 if(j == menu->index){
-                    printf("buf size %d\n", sizeof(buf));
                     strlcpy(buf, MENU8G2_INDICATOR, sizeof(buf)); // Selector Indicator
                 }
                 else{
@@ -113,20 +113,20 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
 
         // Block until user inputs a button
 		if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
-			if(input_buf & (0x01 << LEFT)){
+			if(input_buf & (0x01 << EASY_INPUT_BACK)){
                 return false;
 			}
-			else if(input_buf & (0x01 << UP)){
+			else if(input_buf & (0x01 << EASY_INPUT_UP)){
                 if(menu->index > 0){
                     menu->index--;
                 }
 			}
-			else if(input_buf & (0x01 << DOWN)){
+			else if(input_buf & (0x01 << EASY_INPUT_DOWN)){
                 if(menu->index < max_lines - 1){
                     menu->index++;
                 }
 			}
-			else if(input_buf & (0x01 << ENTER)){
+			else if(input_buf & (0x01 << EASY_INPUT_ENTER)){
                 return true;
 			}
 		}
@@ -148,7 +148,7 @@ bool menu8g2_create_simple(menu8g2_t *menu,
         const uint32_t options_len
         ){
     return menu8g2_create_vertical_menu(menu, title, options,
-            &linear_string_selector, options_len);
+            (void *) &linear_string_selector, options_len);
 }
 
 menu8g2_err_t menu8g2_display_text(menu8g2_t *menu, const char *text){
@@ -175,14 +175,14 @@ menu8g2_err_t menu8g2_display_text(menu8g2_t *menu, const char *text){
     // Block until user inputs a button
     for(;;){
         if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
-            if(input_buf & (0x01 << LEFT)){
+            if(input_buf & (0x01 << EASY_INPUT_BACK)){
                 return E_SUCCESS;
             }
-            else if(input_buf & (0x01 << UP)){
+            else if(input_buf & (0x01 << EASY_INPUT_UP)){
             }
-            else if(input_buf & (0x01 << DOWN)){
+            else if(input_buf & (0x01 << EASY_INPUT_DOWN)){
             }
-            else if(input_buf & (0x01 << ENTER)){
+            else if(input_buf & (0x01 << EASY_INPUT_ENTER)){
             }
         }
     }
