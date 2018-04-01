@@ -44,8 +44,9 @@ const char MENU8G2_INDICATOR[] = " > ";
  * index_to_option*/
 bool menu8g2_create_vertical_menu(menu8g2_t *menu,
         const char title[],
-        const void *meta,
-        const void (*index_to_option)(char buf[], const void *meta, const uint8_t index),
+        void *meta,
+        void (*index_to_option)(char buf[], const size_t buf_len,
+             void *meta, const uint8_t index),
         const uint32_t max_lines
         ){
     uint8_t base_height; // Starting y value after title
@@ -58,6 +59,8 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
     uint8_t j;
     char buf[LINE_BUFFER_SIZE]; // buffer for printing strings
 	uint8_t input_buf; // holds the incoming button presses
+
+    assert(strlen(MENU8G2_INDICATOR) < sizeof(buf));
 
     u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
     item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + BORDER_SIZE;
@@ -91,7 +94,8 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                     break; // No more options to display
                 }
                 if(j == menu->index){
-                    strcpy(buf, MENU8G2_INDICATOR); // Selector Indicator
+                    printf("buf size %d\n", sizeof(buf));
+                    strlcpy(buf, MENU8G2_INDICATOR, sizeof(buf)); // Selector Indicator
                 }
                 else{
                     // Pad with spaces to be even with selection
@@ -100,7 +104,9 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                     }
                 }
                 element_y_pos += item_height + BORDER_SIZE;
-                (*index_to_option)(buf + strlen(MENU8G2_INDICATOR), meta, j);
+                (*index_to_option)(buf + strlen(MENU8G2_INDICATOR),
+                        sizeof(buf) - strlen(MENU8G2_INDICATOR),
+                        meta, j);
                 u8g2_DrawStr(menu->u8g2, BORDER_SIZE, element_y_pos, buf);
             }
         } while(u8g2_NextPage(menu->u8g2));
@@ -128,10 +134,11 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
 	return false; // should never reach here, but just in case
 }
 
-static menu8g2_err_t linear_string_selector(char buf[], const char *options[], const uint32_t index){
+static menu8g2_err_t linear_string_selector(char buf[], const size_t buf_len, 
+        const char *options[], const uint32_t index){
     /* Simple function that copies the string at index from options into the buf 
      * Used in menu8g2_create_simple as the index_to_option function*/
-    strcpy(buf, options[index]);
+    strlcpy(buf, options[index], buf_len);
     return E_SUCCESS;
 }
 
@@ -159,7 +166,7 @@ menu8g2_err_t menu8g2_display_text(menu8g2_t *menu, const char *text){
     u8g2_FirstPage(menu->u8g2);
     do{
         for(int i=0; i<n_lines; i++){
-            strncpy(buf, text+i*CHAR_PER_LINE_WRAP, CHAR_PER_LINE_WRAP);
+            strlcpy(buf, text+i*CHAR_PER_LINE_WRAP, sizeof(buf));
             buf[CHAR_PER_LINE_WRAP] = '\0';
             u8g2_DrawStr(menu->u8g2, 0, item_height + i*item_height, buf);
         }

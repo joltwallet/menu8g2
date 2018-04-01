@@ -45,8 +45,8 @@ u8g2_t *menu8g2_get_u8g2(menu8g2_t *menu);
 /* Generic Vertical Scrolling Menu */
 bool menu8g2_create_vertical_menu(menu8g2_t *menu,
         const char title[],
-        const void *meta,
-        const void (*index_to_option)(char buf[], const void *meta, const uint8_t index),
+        void *meta,
+        void (*index_to_option)(char buf[], const size_t buf_len, void *meta, const uint8_t index),
         const uint32_t max_lines
         );
 

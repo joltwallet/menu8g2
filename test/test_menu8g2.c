@@ -15,8 +15,8 @@
 
 #include "buttons.h"
 
-volatile u8g2_t u8g2;
-volatile QueueHandle_t input_queue;
+u8g2_t u8g2;
+QueueHandle_t input_queue;
 
 /* Configure this to your test screen to see results */
 static void setup_screen(u8g2_t *u8g2){
@@ -80,7 +80,7 @@ TEST_CASE("Basic Vertical Menu", "[menu8g2]"){
     }
 }
 
-static menu8g2_err_t squarer(char buf[], const char *options[], const uint32_t index){
+static menu8g2_err_t squarer(char buf[], size_t buf_len, const char *options[], const uint32_t index){
     sprintf(buf, "sqr: %d", index*index);
     return E_SUCCESS;
 }

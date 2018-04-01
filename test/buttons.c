@@ -41,7 +41,7 @@ static bool button_periodic_update(button_status_t *button){
     return false;
 }
 
-TaskFunction_t vButtonDebounceTask( QueueHandle_t *input_queue ){
+TaskFunction_t vButtonDebounceTask( void *input_queue ){
     // Timer Setup
     TickType_t xNextWakeTime = xTaskGetTickCount();
 
@@ -72,7 +72,7 @@ TaskFunction_t vButtonDebounceTask( QueueHandle_t *input_queue ){
 
         // If a debounced button is triggered, send it off to the queue
         if(triggered_buttons){
-            xQueueSend(*input_queue, &triggered_buttons, 0);
+            xQueueSend(*(QueueHandle_t *)input_queue, &triggered_buttons, 0);
         }
     }
 

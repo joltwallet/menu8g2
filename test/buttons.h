@@ -33,6 +33,6 @@
     
     void setup_buttons();
 
-    TaskFunction_t vButtonDebounceTask( QueueHandle_t *input_queue );
+    TaskFunction_t vButtonDebounceTask( void *input_queue );
 
 #endif
