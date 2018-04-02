@@ -36,9 +36,6 @@ u8g2_t *menu8g2_get_u8g2(menu8g2_t *menu){
 }
 
 
-#define BORDER_SIZE 1
-#define LINE_BUFFER_SIZE 80
-const char MENU8G2_INDICATOR[] = " > ";
 
 /* Generic Vertical Scrolling Menu 
  * meta - some pointer to meta data to be used in function pointer
@@ -58,19 +55,19 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
     uint8_t element_y_pos; // variable for element positioning
     int8_t top_menu_element;
     uint8_t j;
-    char buf[LINE_BUFFER_SIZE]; // buffer for printing strings
+    char buf[CONFIG_MENU8G2_LINE_BUFFER_LEN]; // buffer for printing strings
 	uint8_t input_buf; // holds the incoming button presses
 
-    assert(strlen(MENU8G2_INDICATOR) < sizeof(buf));
+    assert(strlen(CONFIG_MENU8G2_INDICATOR) < sizeof(buf));
 
     u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
-    item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + BORDER_SIZE;
+    item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + CONFIG_MENU8G2_BORDER_SIZE;
 
-    base_height = item_height + 2 * BORDER_SIZE;
+    base_height = item_height + 2 * CONFIG_MENU8G2_BORDER_SIZE;
 
     // Compute how many items can fit on the screen at once
     max_onscreen_items = (u8g2_GetDisplayHeight(menu->u8g2) - base_height)
-            / (item_height+BORDER_SIZE);
+            / (item_height+CONFIG_MENU8G2_BORDER_SIZE);
 
 	for(;;){
         u8g2_FirstPage(menu->u8g2);
@@ -95,19 +92,19 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                     break; // No more options to display
                 }
                 if(j == menu->index){
-                    strlcpy(buf, MENU8G2_INDICATOR, sizeof(buf)); // Selector Indicator
+                    strlcpy(buf, CONFIG_MENU8G2_INDICATOR, sizeof(buf)); // Selector Indicator
                 }
                 else{
                     // Pad with spaces to be even with selection
-                    for(int i=0; i<strlen(MENU8G2_INDICATOR); i++){
+                    for(int i=0; i<strlen(CONFIG_MENU8G2_INDICATOR); i++){
                         buf[i] = ' ';
                     }
                 }
-                element_y_pos += item_height + BORDER_SIZE;
-                (*index_to_option)(buf + strlen(MENU8G2_INDICATOR),
-                        sizeof(buf) - strlen(MENU8G2_INDICATOR),
+                element_y_pos += item_height + CONFIG_MENU8G2_BORDER_SIZE;
+                (*index_to_option)(buf + strlen(CONFIG_MENU8G2_INDICATOR),
+                        sizeof(buf) - strlen(CONFIG_MENU8G2_INDICATOR),
                         meta, j);
-                u8g2_DrawStr(menu->u8g2, BORDER_SIZE, element_y_pos, buf);
+                u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, element_y_pos, buf);
             }
         } while(u8g2_NextPage(menu->u8g2));
 
@@ -157,7 +154,7 @@ menu8g2_err_t menu8g2_display_text(menu8g2_t *menu, const char *text){
 	uint8_t input_buf; // holds the incoming button presses
 
     u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
-    item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + BORDER_SIZE;
+    item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + CONFIG_MENU8G2_BORDER_SIZE;
 
     uint16_t str_len = strlen(text);
     uint16_t n_lines = 1 + ((str_len - 1) / CHAR_PER_LINE_WRAP);

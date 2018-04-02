@@ -1,0 +1,22 @@
+menu "Menu8g2 Config"
+    config MENU8G2_INDICATOR
+        string
+        prompt "prefix to apply for address data"
+        default " > "
+        help
+            Prepended to selected menu option
+
+    config MENU8G2_BORDER_SIZE
+        int
+        prompt "Blank boudary around options"
+        default 1
+        help
+            help text here
+    config MENU8G2_LINE_BUFFER_LEN
+        int
+        prompt "Buffer size for a single line string on the display"
+        default 80
+        help
+            help text here
+
+endmenu
