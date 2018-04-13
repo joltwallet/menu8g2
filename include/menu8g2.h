@@ -21,6 +21,19 @@ typedef struct menu8g2_t{
     u8g2_t *u8g2;
 } menu8g2_t;
 
+// For modular construction of menus from element structs
+typedef struct menu8g2_element_t{
+    char *name;
+    void (*menu_h)(menu8g2_t *prev);
+} menu8g2_element_t;
+
+typedef struct menu8g2_elements_t{
+    uint32_t index;
+    uint32_t n;
+    struct menu8g2_element_t *elements;
+} menu8g2_elements_t;
+
+
 /* Allocate memory for menu8g2_t object and set display object
  * menu - menu object to initializie
  * u8g2 - display object for menu to use
@@ -47,6 +60,14 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
         void (*index_to_option)(char buf[], const size_t buf_len, void *meta, const uint8_t index),
         const uint32_t max_lines
         );
+
+void menu8g2_set_element(menu8g2_elements_t *elements, char *name, void *func);
+void menu8g2_elements_init(menu8g2_elements_t *elements, uint32_t n);
+void menu8g2_elements_free(menu8g2_elements_t *elements);
+
+void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
+        const char title[],
+        menu8g2_elements_t *elements);
 
 /* Simple Menu That only takes in an array of strings and returns selected index */
 bool menu8g2_create_simple(menu8g2_t *menu,

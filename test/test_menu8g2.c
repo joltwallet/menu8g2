@@ -17,6 +17,8 @@ u8g2_t u8g2;
 
 bool display_initialized = false;
 
+#define NUM_OF(x) (sizeof (x) / sizeof (*x))
+
 /* Configure this to your test screen to see results */
 static void setup_screen(u8g2_t *u8g2){
     if (display_initialized){
@@ -256,6 +258,35 @@ TEST_CASE("Basic Stack Menu", "[menu8g2]"){
         }
 
     }while(res == true);
+    vTaskDelete(h_push_button);
+}
+
+TEST_CASE("Element Menu", "[menu8g2]"){
+    setup_screen(&u8g2);
+    QueueHandle_t input_queue;
+    easy_input_queue_init(&input_queue);
+    TaskHandle_t h_push_button = NULL;
+    xTaskCreate(easy_input_push_button_task, \
+            "ButtonDebounce", 2048,
+            (void *)&input_queue, 20, \
+            &h_push_button);
+
+    menu8g2_t menu;
+    menu8g2_init(&menu, &u8g2, input_queue);
+
+    const char title[] = "Element Stack Menu";
+
+    menu8g2_elements_t elements;
+    menu8g2_elements_init(&elements, 2);
+    menu8g2_set_element(&elements, "Animals", &animal_menu);
+    menu8g2_set_element(&elements, "Cryptocurrencies", &crypto_menu);
+
+    menu8g2_create_vertical_element_menu(&menu, title, &elements);
+
+    menu8g2_elements_free(&elements);
+
+    printf("Menu exited by pressing BACK.\n");
+
     vTaskDelete(h_push_button);
 }
 
