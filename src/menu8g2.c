@@ -264,7 +264,9 @@ void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
                 }
 			}
 			else if(input_buf & (0x01 << EASY_INPUT_ENTER)){
-                (elements->elements)[menu->index].menu_h(menu);
+                if((elements->elements)[menu->index].menu_h){
+                    (elements->elements)[menu->index].menu_h(menu);
+                }
 			}
 		}
 	}
