@@ -89,7 +89,7 @@ TEST_CASE("Basic Vertical Menu", "[menu8g2]"){
 
 static menu8g2_err_t squarer(char buf[], size_t buf_len, const char *options[], const uint32_t index){
     sprintf(buf, "sqr: %d", index*index);
-    return E_SUCCESS;
+    return MENU8G2_SUCCESS;
 }
 
 TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){

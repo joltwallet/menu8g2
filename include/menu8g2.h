@@ -9,8 +9,8 @@
 #define CHAR_PER_LINE_WRAP 20
 
 typedef enum menu8g2_err_t{
-    E_SUCCESS=0,
-    E_FAILURE
+    MENU8G2_SUCCESS=0,
+    MENU8G2_FAILURE
 } menu8g2_err_t;
 
 
@@ -76,7 +76,7 @@ bool menu8g2_create_simple(menu8g2_t *menu,
         const uint32_t options_len
         );
 
-menu8g2_err_t menu8g2_display_text(menu8g2_t *menu, const char *text);
+uint64_t menu8g2_display_text(menu8g2_t *menu, const char *text);
 
 /* Create a FreeRTOS Task For the Menu */
 menu8g2_err_t menu_task(menu8g2_t *menu); // Not yet implemented

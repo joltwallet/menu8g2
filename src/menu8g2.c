@@ -15,12 +15,12 @@ menu8g2_err_t menu8g2_init(menu8g2_t *menu, u8g2_t *u8g2,
     menu->input_queue = input_queue;
     menu->index = 0;
 
-    return E_SUCCESS;
+    return MENU8G2_SUCCESS;
 }
 
 menu8g2_err_t menu8g2_set_index(menu8g2_t *menu, const uint32_t index){
     menu->index = index;
-    return E_SUCCESS;
+    return MENU8G2_SUCCESS;
 }
 
 uint32_t menu8g2_get_index(menu8g2_t *menu){
@@ -136,7 +136,7 @@ static menu8g2_err_t linear_string_selector(char buf[], const size_t buf_len,
     /* Simple function that copies the string at index from options into the buf 
      * Used in menu8g2_create_simple as the index_to_option function*/
     strlcpy(buf, options[index], buf_len);
-    return E_SUCCESS;
+    return MENU8G2_SUCCESS;
 }
 
 bool menu8g2_create_simple(menu8g2_t *menu,
@@ -148,10 +148,10 @@ bool menu8g2_create_simple(menu8g2_t *menu,
             (void *) &linear_string_selector, options_len);
 }
 
-menu8g2_err_t menu8g2_display_text(menu8g2_t *menu, const char *text){
+uint64_t menu8g2_display_text(menu8g2_t *menu, const char *text){
     /* Wraps text to fit on the dispaly; need to add scrolling */
     uint8_t item_height; // Height of a menu item
-	uint8_t input_buf; // holds the incoming button presses
+	uint64_t input_buf; // holds the incoming button presses
 
     u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
     item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + CONFIG_MENU8G2_BORDER_SIZE;
@@ -172,18 +172,10 @@ menu8g2_err_t menu8g2_display_text(menu8g2_t *menu, const char *text){
     // Block until user inputs a button
     for(;;){
         if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
-            if(input_buf & (0x01 << EASY_INPUT_BACK)){
-                return E_SUCCESS;
-            }
-            else if(input_buf & (0x01 << EASY_INPUT_UP)){
-            }
-            else if(input_buf & (0x01 << EASY_INPUT_DOWN)){
-            }
-            else if(input_buf & (0x01 << EASY_INPUT_ENTER)){
-            }
+            return input_buf;
         }
     }
-    return E_FAILURE;
+    return 0; // Should never get here
 }
 
 void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
