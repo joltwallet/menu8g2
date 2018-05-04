@@ -44,8 +44,8 @@ typedef struct menu8g2_elements_t{
  * */
 menu8g2_err_t menu8g2_init(menu8g2_t *menu,
         u8g2_t *u8g2,
-        QueueHandle_t *input_queue,
-        SemaphoreHandle_t *disp_mutex
+        QueueHandle_t input_queue,
+        SemaphoreHandle_t disp_mutex
         );
 
 /* Change the menu's index (default starting value of 0 */

@@ -11,7 +11,7 @@
 #include "helpers.h"
 
 menu8g2_err_t menu8g2_init(menu8g2_t *menu, u8g2_t *u8g2,
-        QueueHandle_t *input_queue, SemaphoreHandle_t *disp_mutex){
+        QueueHandle_t input_queue, SemaphoreHandle_t disp_mutex){
     menu->u8g2 = u8g2;
     menu->input_queue = input_queue;
     menu->index = 0;
