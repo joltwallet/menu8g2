@@ -119,6 +119,7 @@ TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){
         printf("Menu exited by pressing ENTER.\n");
     }
 
+    vSemaphoreDelete(disp_mutex);
     vTaskDelete(h_push_button);
 }
 
@@ -264,6 +265,7 @@ TEST_CASE("Basic Stack Menu", "[menu8g2]"){
         }
 
     }while(res == true);
+    vSemaphoreDelete(disp_mutex);
     vTaskDelete(h_push_button);
 }
 
@@ -294,6 +296,7 @@ TEST_CASE("Element Menu", "[menu8g2]"){
 
     printf("Menu exited by pressing BACK.\n");
 
+    vSemaphoreDelete(disp_mutex);
     vTaskDelete(h_push_button);
 }
 

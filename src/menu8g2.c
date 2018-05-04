@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "freertos/queue.h"
 
 #include "u8g2.h"
