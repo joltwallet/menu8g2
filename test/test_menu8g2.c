@@ -76,7 +76,7 @@ TEST_CASE("Basic Vertical Menu", "[menu8g2]"){
 
     menu8g2_t menu;
     SemaphoreHandle_t disp_mutex = xSemaphoreCreateMutex();
-    menu8g2_init(&menu, &u8g2, input_queue, &disp_mutex);
+    menu8g2_init(&menu, &u8g2, input_queue, disp_mutex);
 
     bool res = menu8g2_create_simple(&menu, title, options, 9);
     if(res==false){
@@ -107,7 +107,7 @@ TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){
     const char title[] = "OTF Vert Menu Max:20";
     menu8g2_t menu;
     SemaphoreHandle_t disp_mutex = xSemaphoreCreateMutex();
-    menu8g2_init(&menu, &u8g2, input_queue, &disp_mutex);
+    menu8g2_init(&menu, &u8g2, input_queue, disp_mutex);
 
     bool res = menu8g2_create_vertical_menu(&menu, title, NULL,
             (void *)&squarer, 20);
@@ -245,7 +245,7 @@ TEST_CASE("Basic Stack Menu", "[menu8g2]"){
 
     menu8g2_t menu;
     SemaphoreHandle_t disp_mutex = xSemaphoreCreateMutex();
-    menu8g2_init(&menu, &u8g2, input_queue, &disp_mutex);
+    menu8g2_init(&menu, &u8g2, input_queue, disp_mutex);
 
     bool res;
     do{
@@ -281,7 +281,7 @@ TEST_CASE("Element Menu", "[menu8g2]"){
 
     menu8g2_t menu;
     SemaphoreHandle_t disp_mutex = xSemaphoreCreateMutex();
-    menu8g2_init(&menu, &u8g2, input_queue, &disp_mutex);
+    menu8g2_init(&menu, &u8g2, input_queue, disp_mutex);
 
     const char title[] = "Element Stack Menu";
 
