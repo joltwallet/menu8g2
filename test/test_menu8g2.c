@@ -75,7 +75,8 @@ TEST_CASE("Basic Vertical Menu", "[menu8g2]"){
     };
 
     menu8g2_t menu;
-    menu8g2_init(&menu, &u8g2, input_queue);
+    SemaphoreHandle_t disp_mutex = xSemaphoreCreateMutex();
+    menu8g2_init(&menu, &u8g2, input_queue, disp_mutex);
 
     bool res = menu8g2_create_simple(&menu, title, options, 9);
     if(res==false){
@@ -84,6 +85,7 @@ TEST_CASE("Basic Vertical Menu", "[menu8g2]"){
     else{
         printf("Menu exited by pressing ENTER.\n");
     }
+    vSemaphoreDelete(disp_mutex);
     vTaskDelete(h_push_button);
 }
 
@@ -104,7 +106,8 @@ TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){
 
     const char title[] = "OTF Vert Menu Max:20";
     menu8g2_t menu;
-    menu8g2_init(&menu, &u8g2, input_queue);
+    SemaphoreHandle_t disp_mutex = xSemaphoreCreateMutex();
+    menu8g2_init(&menu, &u8g2, input_queue, disp_mutex);
 
     bool res = menu8g2_create_vertical_menu(&menu, title, NULL,
             (void *)&squarer, 20);
@@ -116,15 +119,14 @@ TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){
         printf("Menu exited by pressing ENTER.\n");
     }
 
+    vSemaphoreDelete(disp_mutex);
     vTaskDelete(h_push_button);
 }
 
 static void animal_menu(menu8g2_t *prev){
     bool res;
     menu8g2_t menu;
-    menu8g2_init(&menu,
-            menu8g2_get_u8g2(prev),
-            menu8g2_get_input_queue(prev));
+    menu8g2_copy(&menu, prev);
 
     const char title[] = "Animal Menu";
     const char *options[] = {
@@ -182,9 +184,7 @@ static void animal_menu(menu8g2_t *prev){
 static void crypto_menu(menu8g2_t *prev){
     bool res;
     menu8g2_t menu;
-    menu8g2_init(&menu,
-            menu8g2_get_u8g2(prev),
-            menu8g2_get_input_queue(prev));
+    menu8g2_copy(&menu, prev);
 
     const char title[] = "Crypto Menu";
     const char *options[] = {
@@ -238,7 +238,8 @@ TEST_CASE("Basic Stack Menu", "[menu8g2]"){
     };
 
     menu8g2_t menu;
-    menu8g2_init(&menu, &u8g2, input_queue);
+    SemaphoreHandle_t disp_mutex = xSemaphoreCreateMutex();
+    menu8g2_init(&menu, &u8g2, input_queue, disp_mutex);
 
     bool res;
     do{
@@ -258,6 +259,7 @@ TEST_CASE("Basic Stack Menu", "[menu8g2]"){
         }
 
     }while(res == true);
+    vSemaphoreDelete(disp_mutex);
     vTaskDelete(h_push_button);
 }
 
@@ -272,7 +274,8 @@ TEST_CASE("Element Menu", "[menu8g2]"){
             &h_push_button);
 
     menu8g2_t menu;
-    menu8g2_init(&menu, &u8g2, input_queue);
+    SemaphoreHandle_t disp_mutex = xSemaphoreCreateMutex();
+    menu8g2_init(&menu, &u8g2, input_queue, disp_mutex);
 
     const char title[] = "Element Stack Menu";
 
@@ -287,6 +290,7 @@ TEST_CASE("Element Menu", "[menu8g2]"){
 
     printf("Menu exited by pressing BACK.\n");
 
+    vSemaphoreDelete(disp_mutex);
     vTaskDelete(h_push_button);
 }
 

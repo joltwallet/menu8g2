@@ -3,6 +3,7 @@
 
 #include "u8g2.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "freertos/queue.h"
 #include "easy_input.h"
 
@@ -19,6 +20,7 @@ typedef struct menu8g2_t{
     uint32_t index;
     QueueHandle_t *input_queue;
     u8g2_t *u8g2;
+    SemaphoreHandle_t *disp_mutex;
 } menu8g2_t;
 
 // For modular construction of menus from element structs
@@ -40,16 +42,19 @@ typedef struct menu8g2_elements_t{
  * input_queue - bitmasked inputs for controlling the menu; Suggested to have
  * enumerated bitshifts.
  * */
-menu8g2_err_t menu8g2_init(menu8g2_t *menu,
+void menu8g2_init(menu8g2_t *menu,
         u8g2_t *u8g2,
-        QueueHandle_t *input_queue
+        QueueHandle_t input_queue,
+        SemaphoreHandle_t disp_mutex
         );
+void menu8g2_copy(menu8g2_t *menu, menu8g2_t *old);
 
 /* Change the menu's index (default starting value of 0 */
 menu8g2_err_t menu8g2_set_index(menu8g2_t *menu, const uint32_t index);
 uint32_t menu8g2_get_index(menu8g2_t *menu);
 
 QueueHandle_t *menu8g2_get_input_queue(menu8g2_t *menu);
+SemaphoreHandle_t *menu8g2_get_disp_mutex(menu8g2_t *menu);
 
 u8g2_t *menu8g2_get_u8g2(menu8g2_t *menu);
 
