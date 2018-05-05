@@ -126,10 +126,7 @@ TEST_CASE("On-The-Fly Vertical Menu", "[menu8g2]"){
 static void animal_menu(menu8g2_t *prev){
     bool res;
     menu8g2_t menu;
-    menu8g2_init(&menu,
-            menu8g2_get_u8g2(prev),
-            menu8g2_get_input_queue(prev),
-            menu8g2_get_disp_mutex(prev));
+    menu8g2_copy(&menu, prev);
 
     const char title[] = "Animal Menu";
     const char *options[] = {
@@ -187,10 +184,7 @@ static void animal_menu(menu8g2_t *prev){
 static void crypto_menu(menu8g2_t *prev){
     bool res;
     menu8g2_t menu;
-    menu8g2_init(&menu,
-            menu8g2_get_u8g2(prev),
-            menu8g2_get_input_queue(prev),
-            menu8g2_get_disp_mutex(prev));
+    menu8g2_copy(&menu, prev);
 
     const char title[] = "Crypto Menu";
     const char *options[] = {

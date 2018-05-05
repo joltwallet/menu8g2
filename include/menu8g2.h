@@ -42,11 +42,12 @@ typedef struct menu8g2_elements_t{
  * input_queue - bitmasked inputs for controlling the menu; Suggested to have
  * enumerated bitshifts.
  * */
-menu8g2_err_t menu8g2_init(menu8g2_t *menu,
+void menu8g2_init(menu8g2_t *menu,
         u8g2_t *u8g2,
         QueueHandle_t input_queue,
         SemaphoreHandle_t disp_mutex
         );
+void menu8g2_copy(menu8g2_t *menu, menu8g2_t *old);
 
 /* Change the menu's index (default starting value of 0 */
 menu8g2_err_t menu8g2_set_index(menu8g2_t *menu, const uint32_t index);

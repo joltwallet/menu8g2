@@ -10,14 +10,20 @@
 #include "easy_input.h"
 #include "helpers.h"
 
-menu8g2_err_t menu8g2_init(menu8g2_t *menu, u8g2_t *u8g2,
+void menu8g2_init(menu8g2_t *menu, u8g2_t *u8g2,
         QueueHandle_t input_queue, SemaphoreHandle_t disp_mutex){
     menu->u8g2 = u8g2;
     menu->input_queue = input_queue;
     menu->index = 0;
     menu->disp_mutex = disp_mutex; 
+}
 
-    return MENU8G2_SUCCESS;
+void menu8g2_copy(menu8g2_t *new, menu8g2_t *old){
+    /* Copies everything except index */
+    new->u8g2 = old->u8g2;
+    new->input_queue = old->input_queue;
+    new->index = 0;
+    new->disp_mutex = old->disp_mutex;
 }
 
 menu8g2_err_t menu8g2_set_index(menu8g2_t *menu, const uint32_t index){
