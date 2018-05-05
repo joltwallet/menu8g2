@@ -10,12 +10,29 @@
 #include "easy_input.h"
 #include "helpers.h"
 
+#define BEGIN_DRAW(menu) \
+    xSemaphoreTake(menu->disp_mutex, portMAX_DELAY); \
+    u8g2_FirstPage(menu->u8g2); \
+    do { \
+        if(menu->pre_draw) menu->pre_draw(menu);
+
+#define END_DRAW(menu) \
+        if(menu->post_draw) menu->post_draw(menu); \
+    } while(u8g2_NextPage(menu->u8g2)); \
+    xSemaphoreGive(menu->disp_mutex);
+
 void menu8g2_init(menu8g2_t *menu, u8g2_t *u8g2,
-        QueueHandle_t input_queue, SemaphoreHandle_t disp_mutex){
+        QueueHandle_t input_queue,
+        SemaphoreHandle_t disp_mutex,
+        void (*pre_draw)(menu8g2_t *menu),
+        void (*post_draw)(menu8g2_t *menu)
+        ){
     menu->u8g2 = u8g2;
     menu->input_queue = input_queue;
     menu->index = 0;
-    menu->disp_mutex = disp_mutex; 
+    menu->disp_mutex = disp_mutex;
+    menu->pre_draw = pre_draw;
+    menu->post_draw = post_draw;
 }
 
 void menu8g2_copy(menu8g2_t *new, menu8g2_t *old){
@@ -23,6 +40,8 @@ void menu8g2_copy(menu8g2_t *new, menu8g2_t *old){
     new->u8g2 = old->u8g2;
     new->input_queue = old->input_queue;
     new->index = 0;
+    new->pre_draw = old->pre_draw;
+    new->post_draw = old->post_draw;
     new->disp_mutex = old->disp_mutex;
 }
 
@@ -80,9 +99,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
             / (item_height+CONFIG_MENU8G2_BORDER_SIZE);
 
 	for(;;){
-        xSemaphoreTake(menu->disp_mutex, portMAX_DELAY);
-        u8g2_FirstPage(menu->u8g2);
-        do{
+        BEGIN_DRAW(menu)
             // Draw the menu title and horizontal line underneith it
             u8g2_DrawStr(menu->u8g2, get_center_x(menu->u8g2, title), item_height,
                     title);
@@ -117,8 +134,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                         meta, j);
                 u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, element_y_pos, buf);
             }
-        } while(u8g2_NextPage(menu->u8g2));
-        xSemaphoreGive(menu->disp_mutex);
+        END_DRAW(menu)
 
         // Block until user inputs a button
 		if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
@@ -172,16 +188,13 @@ uint64_t menu8g2_display_text(menu8g2_t *menu, const char *text){
     uint16_t n_lines = 1 + ((str_len - 1) / CHAR_PER_LINE_WRAP);
     char buf[CHAR_PER_LINE_WRAP+1];
 
-    xSemaphoreTake(menu->disp_mutex, portMAX_DELAY);
-    u8g2_FirstPage(menu->u8g2);
-    do{
+    BEGIN_DRAW(menu)
         for(int i=0; i<n_lines; i++){
             strlcpy(buf, text+i*CHAR_PER_LINE_WRAP, sizeof(buf));
             buf[CHAR_PER_LINE_WRAP] = '\0';
             u8g2_DrawStr(menu->u8g2, 0, item_height + i*item_height, buf);
         }
-    } while(u8g2_NextPage(menu->u8g2));
-    xSemaphoreGive(menu->disp_mutex);
+    END_DRAW(menu)
 
     // Block until user inputs a button
     for(;;){
@@ -218,9 +231,7 @@ void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
             / (item_height+CONFIG_MENU8G2_BORDER_SIZE);
 
 	for(;;){
-        xSemaphoreTake(menu->disp_mutex, portMAX_DELAY);
-        u8g2_FirstPage(menu->u8g2);
-        do{
+        BEGIN_DRAW(menu)
             // Draw the menu title and horizontal line underneith it
             u8g2_DrawStr(menu->u8g2, get_center_x(menu->u8g2, title), item_height,
                     title);
@@ -253,8 +264,7 @@ void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
                 strcpy(buf + strlen(CONFIG_MENU8G2_INDICATOR), (elements->elements)[j].name);
                 u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, element_y_pos, buf);
             }
-        } while(u8g2_NextPage(menu->u8g2));
-        xSemaphoreGive(menu->disp_mutex);
+        END_DRAW(menu)
 
         // Block until user inputs a button
 		if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {

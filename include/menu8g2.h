@@ -2,6 +2,7 @@
 #define __MENU8G2_H__
 
 #include "u8g2.h"
+#include "menu8g2.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/queue.h"
@@ -21,6 +22,8 @@ typedef struct menu8g2_t{
     QueueHandle_t *input_queue;
     u8g2_t *u8g2;
     SemaphoreHandle_t *disp_mutex;
+    void (*pre_draw)(struct menu8g2_t *);
+    void (*post_draw)(struct menu8g2_t *);
 } menu8g2_t;
 
 // For modular construction of menus from element structs
@@ -45,7 +48,9 @@ typedef struct menu8g2_elements_t{
 void menu8g2_init(menu8g2_t *menu,
         u8g2_t *u8g2,
         QueueHandle_t input_queue,
-        SemaphoreHandle_t disp_mutex
+        SemaphoreHandle_t disp_mutex,
+        void (*pre_draw)(menu8g2_t *menu),
+        void (*post_draw)(menu8g2_t *menu)
         );
 void menu8g2_copy(menu8g2_t *menu, menu8g2_t *old);
 
