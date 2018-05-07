@@ -93,14 +93,14 @@ uint64_t menu8g2_display_text(menu8g2_t *menu, const char *text);
 menu8g2_err_t menu_task(menu8g2_t *menu); // Not yet implemented
 
 #define MENU8G2_BEGIN_DRAW(menu) \
-    xSemaphoreTake(menu->disp_mutex, portMAX_DELAY); \
-    u8g2_FirstPage(menu->u8g2); \
+    xSemaphoreTake((menu)->disp_mutex, portMAX_DELAY); \
+    u8g2_FirstPage((menu)->u8g2); \
     do { \
-        if(menu->pre_draw) menu->pre_draw(menu);
+        if((menu)->pre_draw) (menu)->pre_draw(menu);
 
 #define MENU8G2_END_DRAW(menu) \
-        if(menu->post_draw) menu->post_draw(menu); \
-    } while(u8g2_NextPage(menu->u8g2)); \
-    xSemaphoreGive(menu->disp_mutex); \
+        if((menu)->post_draw) (menu)->post_draw(menu); \
+    } while(u8g2_NextPage((menu)->u8g2)); \
+    xSemaphoreGive((menu)->disp_mutex);
 
 #endif
