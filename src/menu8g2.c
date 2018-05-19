@@ -62,8 +62,16 @@ uint8_t menu8g2_buf_header(menu8g2_t *menu, const char *title){
     uint8_t title_height; // Height of a menu item
     title_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) 
             + CONFIG_MENU8G2_BORDER_SIZE;
+
+    #if CONFIG_MENU8G2_HEADER_CENTER_JUST
     u8g2_DrawStr(menu->u8g2, get_center_x(menu->u8g2, title), title_height,
             title);
+    #endif
+    #if CONFIG_MENU8G2_HEADER_LEFT_JUST
+    u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, title_height,
+            title);
+    #endif
+
     u8g2_DrawHLine(menu->u8g2, 0, title_height, u8g2_GetDisplayWidth(menu->u8g2));
     return title_height;
 }

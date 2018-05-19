@@ -19,4 +19,12 @@ menu "Menu8g2 Config"
         help
             help text here
 
+    choice
+        prompt "Select Menu Header Justification"
+        config MENU8G2_HEADER_CENTER_JUST
+            bool "Header String is Centered"
+        config MENU8G2_HEADER_LEFT_JUST
+            bool "Header String is Left Justified"
+    endchoice
+
 endmenu
