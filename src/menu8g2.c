@@ -56,6 +56,26 @@ u8g2_t *menu8g2_get_u8g2(menu8g2_t *menu){
     return menu->u8g2;
 }
 
+uint8_t menu8g2_buf_header(menu8g2_t *menu, const char *title){
+    /* Adds menu title and horizontal line underneith it to display buffer
+     * returns the space took up. */
+    uint8_t title_height; // Height of a menu item
+    title_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) 
+            + CONFIG_MENU8G2_BORDER_SIZE;
+
+    #if CONFIG_MENU8G2_HEADER_CENTER_JUST
+    u8g2_DrawStr(menu->u8g2, get_center_x(menu->u8g2, title), title_height,
+            title);
+    #endif
+    #if CONFIG_MENU8G2_HEADER_LEFT_JUST
+    u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, title_height,
+            title);
+    #endif
+
+    u8g2_DrawHLine(menu->u8g2, 0, title_height, u8g2_GetDisplayWidth(menu->u8g2));
+    return title_height;
+}
+
 /* Generic Vertical Scrolling Menu 
  * meta - some pointer to meta data to be used in function pointer
  * index_to_option*/
@@ -90,11 +110,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
 
 	for(;;){
         MENU8G2_BEGIN_DRAW(menu)
-            // Draw the menu title and horizontal line underneith it
-            u8g2_DrawStr(menu->u8g2, get_center_x(menu->u8g2, title), item_height,
-                    title);
-            u8g2_DrawHLine(menu->u8g2, 0, item_height,
-                    u8g2_GetDisplayWidth(menu->u8g2));
+            menu8g2_buf_header(menu, title);
 
             // figure out what list item should be drawn at the top
             element_y_pos = base_height;
@@ -167,6 +183,11 @@ bool menu8g2_create_simple(menu8g2_t *menu,
 }
 
 uint64_t menu8g2_display_text(menu8g2_t *menu, const char *text){
+    /* Print text full screen */
+    return menu8g2_display_text_title(menu, text, NULL);
+}
+
+uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const char *title){
     /* Wraps text to fit on the dispaly; need to add scrolling */
     uint8_t item_height; // Height of a menu item
 	uint64_t input_buf; // holds the incoming button presses
@@ -179,10 +200,16 @@ uint64_t menu8g2_display_text(menu8g2_t *menu, const char *text){
     char buf[CHAR_PER_LINE_WRAP+1];
 
     MENU8G2_BEGIN_DRAW(menu)
+        uint16_t y_pos = item_height;
+        if(title){
+            y_pos += menu8g2_buf_header(menu, title);
+        }
+
         for(int i=0; i<n_lines; i++){
             strlcpy(buf, text+i*CHAR_PER_LINE_WRAP, sizeof(buf));
             buf[CHAR_PER_LINE_WRAP] = '\0';
-            u8g2_DrawStr(menu->u8g2, 0, item_height + i*item_height, buf);
+            u8g2_DrawStr(menu->u8g2, 0, y_pos, buf);
+            y_pos += item_height;
         }
     MENU8G2_END_DRAW(menu)
 
@@ -222,11 +249,7 @@ void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
 
 	for(;;){
         MENU8G2_BEGIN_DRAW(menu)
-            // Draw the menu title and horizontal line underneith it
-            u8g2_DrawStr(menu->u8g2, get_center_x(menu->u8g2, title), item_height,
-                    title);
-            u8g2_DrawHLine(menu->u8g2, 0, item_height,
-                    u8g2_GetDisplayWidth(menu->u8g2));
+            menu8g2_buf_header(menu, title);
 
             // figure out what list item should be drawn at the top
             element_y_pos = base_height;

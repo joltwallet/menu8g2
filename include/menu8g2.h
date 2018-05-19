@@ -76,6 +76,8 @@ void menu8g2_set_element(menu8g2_elements_t *elements, char *name, void *func);
 void menu8g2_elements_init(menu8g2_elements_t *elements, uint32_t n);
 void menu8g2_elements_free(menu8g2_elements_t *elements);
 
+uint8_t menu8g2_buf_header(menu8g2_t *menu, const char *title);
+
 void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
         const char title[],
         menu8g2_elements_t *elements);
@@ -88,10 +90,13 @@ bool menu8g2_create_simple(menu8g2_t *menu,
         );
 
 uint64_t menu8g2_display_text(menu8g2_t *menu, const char *text);
+uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const char *title);
 
 /* Create a FreeRTOS Task For the Menu */
 menu8g2_err_t menu_task(menu8g2_t *menu); // Not yet implemented
 
+/* Drawing Buffer Wrappers */
+// Used to wrap drawing loop, handle mutexs, and pre/post draw functions
 #define MENU8G2_BEGIN_DRAW(menu) \
     xSemaphoreTake((menu)->disp_mutex, portMAX_DELAY); \
     u8g2_FirstPage((menu)->u8g2); \

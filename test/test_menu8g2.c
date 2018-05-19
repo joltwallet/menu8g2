@@ -168,7 +168,9 @@ static void animal_menu(menu8g2_t *prev){
                      menu8g2_display_text(&menu, "Oink");
                      break;
                 case 6:
-                     menu8g2_display_text(&menu, "Mooooooooooooooooooooooooooooo");
+                     menu8g2_display_text_title(&menu, 
+                             "Mooooooooooooooooooooooooooooo",
+                             "Cow Says");
                      break;
                 case 7:
                      menu8g2_display_text(&menu, "Cock-a-doodle-doooooooooooooooo");
