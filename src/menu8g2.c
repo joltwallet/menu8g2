@@ -69,10 +69,11 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
     uint8_t base_height; // Starting y value after title
     uint8_t item_height; // Height of a menu item
     uint8_t max_onscreen_items; // Maximum Number of onscreen menu items
+    bool outcome;
 
     /* Plotting Variables */
     uint8_t element_y_pos; // variable for element positioning
-    int8_t top_menu_element;
+    int32_t top_menu_element, old_top_menu_element;
     uint8_t j;
     //char buf[CONFIG_MENU8G2_LINE_BUFFER_LEN]; // buffer for printing strings
 	uint8_t input_buf; // holds the incoming button presses
@@ -114,9 +115,9 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
     }
 
 	for(;;){
-        top_menu_element = menu->index - (max_onscreen_items / 2);
-        if(top_menu_element < 0){
-            top_menu_element = 0;
+        old_top_menu_element = menu->index - (max_onscreen_items / 2);
+        if(old_top_menu_element < 0){
+            old_top_menu_element = 0;
         }
         element_y_pos = base_height;
 
@@ -128,7 +129,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                     u8g2_GetDisplayWidth(menu->u8g2));
 
             for(uint8_t i=0; i<max_onscreen_items; i++){
-                j = top_menu_element + i;
+                j = old_top_menu_element + i;
                 element_y_pos += item_height + CONFIG_MENU8G2_BORDER_SIZE;
                 u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, element_y_pos, buf[i]);
                 if(j == menu->index){
@@ -140,53 +141,63 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
         // Block until user inputs a button
 		if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
 			if(input_buf & (0x01 << EASY_INPUT_BACK)){
-                return false;
+                outcome = false;
+                goto exit;
 			}
 			else if(input_buf & (0x01 << EASY_INPUT_UP)){
                 if(menu->index > 0){
                     menu->index--;
-                    for(uint8_t i=max_onscreen_items-1; i>0; i--){
-                        strcpy(buf[i], buf[i-1]);
-                    }
                     top_menu_element = menu->index - (max_onscreen_items / 2);
                     if(top_menu_element < 0){
                         top_menu_element = 0;
                     }
-                    (*index_to_option)(buf[0] + strlen(CONFIG_MENU8G2_INDICATOR),
-                            CONFIG_MENU8G2_LINE_BUFFER_LEN - strlen(CONFIG_MENU8G2_INDICATOR),
-                            meta, top_menu_element);
+                    if(old_top_menu_element != top_menu_element){
+                        for(uint8_t i=max_onscreen_items-1; i>0; i--){
+                            strcpy(buf[i], buf[i-1]);
+                        }
+                        (*index_to_option)(buf[0] + strlen(CONFIG_MENU8G2_INDICATOR),
+                                CONFIG_MENU8G2_LINE_BUFFER_LEN - strlen(CONFIG_MENU8G2_INDICATOR),
+                                meta, top_menu_element);
+                    }
                 }
 			}
 			else if(input_buf & (0x01 << EASY_INPUT_DOWN)){
                 if(menu->index < max_lines - 1){
                     menu->index++;
-                    for(uint8_t i=0; i<max_onscreen_items-1; i++){
-                        strcpy(buf[i], buf[i+1]);
-                    }
-
                     top_menu_element = menu->index - (max_onscreen_items / 2);
                     if(top_menu_element < 0){
                         top_menu_element = 0;
                     }
-                    if(top_menu_element+max_onscreen_items-1 < max_lines){
-                        (*index_to_option)(buf[max_onscreen_items-1] + strlen(CONFIG_MENU8G2_INDICATOR),
-                                CONFIG_MENU8G2_LINE_BUFFER_LEN - strlen(CONFIG_MENU8G2_INDICATOR),
-                                meta, top_menu_element + max_onscreen_items -1);
-                    }
-                    else{
-                        for(int k=0; k<strlen(CONFIG_MENU8G2_INDICATOR); k++){
-                            buf[max_onscreen_items-1][k] = ' ';
+                    if(old_top_menu_element != top_menu_element){
+                        for(uint8_t i=0; i<max_onscreen_items-1; i++){
+                            strcpy(buf[i], buf[i+1]);
                         }
-                        buf[max_onscreen_items-1][strlen(CONFIG_MENU8G2_INDICATOR)] = '\0';
+                        if(top_menu_element+max_onscreen_items-1 < max_lines){
+                            (*index_to_option)(buf[max_onscreen_items-1] + strlen(CONFIG_MENU8G2_INDICATOR),
+                                    CONFIG_MENU8G2_LINE_BUFFER_LEN - strlen(CONFIG_MENU8G2_INDICATOR),
+                                    meta, top_menu_element + max_onscreen_items -1);
+                        }
+                        else{
+                            for(int k=0; k<strlen(CONFIG_MENU8G2_INDICATOR); k++){
+                                buf[max_onscreen_items-1][k] = ' ';
+                            }
+                            buf[max_onscreen_items-1][strlen(CONFIG_MENU8G2_INDICATOR)] = '\0';
+                        }
                     }
                 }
 			}
 			else if(input_buf & (0x01 << EASY_INPUT_ENTER)){
-                return true;
+                outcome = true;
+                goto exit;
 			}
 		}
 	}
-	return false; // should never reach here, but just in case
+    exit:
+        for ( uint8_t i = 0; i < max_onscreen_items; i++ ){
+            free(buf[i]);
+        }
+        free(buf);
+        return outcome;
 }
 
 static menu8g2_err_t linear_string_selector(char buf[], const size_t buf_len, 
