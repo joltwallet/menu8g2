@@ -89,15 +89,14 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
     uint8_t base_height; // Starting y value after title
     uint8_t item_height; // Height of a menu item
     uint8_t max_onscreen_items; // Maximum Number of onscreen menu items
+    bool outcome;
 
     /* Plotting Variables */
     uint8_t element_y_pos; // variable for element positioning
-    int8_t top_menu_element;
+    int32_t top_menu_element, old_top_menu_element;
     uint8_t j;
-    char buf[CONFIG_MENU8G2_LINE_BUFFER_LEN]; // buffer for printing strings
+    //char buf[CONFIG_MENU8G2_LINE_BUFFER_LEN]; // buffer for printing strings
 	uint8_t input_buf; // holds the incoming button presses
-
-    assert(strlen(CONFIG_MENU8G2_INDICATOR) < sizeof(buf));
 
     u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
     item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + CONFIG_MENU8G2_BORDER_SIZE;
@@ -108,61 +107,113 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
     max_onscreen_items = (u8g2_GetDisplayHeight(menu->u8g2) - base_height)
             / (item_height+CONFIG_MENU8G2_BORDER_SIZE);
 
+    // Allocate buffer
+    char **buf = (char**) calloc(max_onscreen_items, sizeof(char*));
+    for ( uint8_t i = 0; i < max_onscreen_items; i++ ){
+        buf[i] = (char*) calloc(CONFIG_MENU8G2_LINE_BUFFER_LEN, sizeof(char));
+    }
+    top_menu_element = menu->index - (max_onscreen_items / 2);
+    if(top_menu_element < 0){
+        top_menu_element = 0;
+    }
+    // Populate buffer
+    for(uint8_t i=0; i<max_onscreen_items; i++){
+        // Add the cursor to the buffer
+        j = top_menu_element + i;
+        if(j >= max_lines){
+            break; // No more options to display
+        }
+        // Pad with spaces to be even with selection
+        for(int k=0; k<strlen(CONFIG_MENU8G2_INDICATOR); k++){
+            buf[i][k] = ' ';
+        }
+
+        element_y_pos += item_height + CONFIG_MENU8G2_BORDER_SIZE;
+        (*index_to_option)(buf[i] + strlen(CONFIG_MENU8G2_INDICATOR),
+                CONFIG_MENU8G2_LINE_BUFFER_LEN - strlen(CONFIG_MENU8G2_INDICATOR),
+                meta, j);
+    }
+
 	for(;;){
+        old_top_menu_element = menu->index - (max_onscreen_items / 2);
+        if(old_top_menu_element < 0){
+            old_top_menu_element = 0;
+        }
+        element_y_pos = base_height;
+
         MENU8G2_BEGIN_DRAW(menu)
             menu8g2_buf_header(menu, title);
 
-            // figure out what list item should be drawn at the top
-            element_y_pos = base_height;
-            top_menu_element = menu->index - (max_onscreen_items / 2);
-            if(top_menu_element < 0){
-                top_menu_element = 0;
-            }
-
             for(uint8_t i=0; i<max_onscreen_items; i++){
-                // Add the cursor to the buffer
-                j = top_menu_element + i;
-                if(j >= max_lines){
-                    break; // No more options to display
-                }
-                if(j == menu->index){
-                    strlcpy(buf, CONFIG_MENU8G2_INDICATOR, sizeof(buf)); // Selector Indicator
-                }
-                else{
-                    // Pad with spaces to be even with selection
-                    for(int i=0; i<strlen(CONFIG_MENU8G2_INDICATOR); i++){
-                        buf[i] = ' ';
-                    }
-                }
+                j = old_top_menu_element + i;
                 element_y_pos += item_height + CONFIG_MENU8G2_BORDER_SIZE;
-                (*index_to_option)(buf + strlen(CONFIG_MENU8G2_INDICATOR),
-                        sizeof(buf) - strlen(CONFIG_MENU8G2_INDICATOR),
-                        meta, j);
-                u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, element_y_pos, buf);
+                u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, element_y_pos, buf[i]);
+                if(j == menu->index){
+                    u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, element_y_pos, CONFIG_MENU8G2_INDICATOR);
+                }
             }
         MENU8G2_END_DRAW(menu)
 
         // Block until user inputs a button
 		if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
 			if(input_buf & (0x01 << EASY_INPUT_BACK)){
-                return false;
+                outcome = false;
+                goto exit;
 			}
 			else if(input_buf & (0x01 << EASY_INPUT_UP)){
                 if(menu->index > 0){
                     menu->index--;
+                    top_menu_element = menu->index - (max_onscreen_items / 2);
+                    if(top_menu_element < 0){
+                        top_menu_element = 0;
+                    }
+                    if(old_top_menu_element != top_menu_element){
+                        for(uint8_t i=max_onscreen_items-1; i>0; i--){
+                            strcpy(buf[i], buf[i-1]);
+                        }
+                        (*index_to_option)(buf[0] + strlen(CONFIG_MENU8G2_INDICATOR),
+                                CONFIG_MENU8G2_LINE_BUFFER_LEN - strlen(CONFIG_MENU8G2_INDICATOR),
+                                meta, top_menu_element);
+                    }
                 }
 			}
 			else if(input_buf & (0x01 << EASY_INPUT_DOWN)){
                 if(menu->index < max_lines - 1){
                     menu->index++;
+                    top_menu_element = menu->index - (max_onscreen_items / 2);
+                    if(top_menu_element < 0){
+                        top_menu_element = 0;
+                    }
+                    if(old_top_menu_element != top_menu_element){
+                        for(uint8_t i=0; i<max_onscreen_items-1; i++){
+                            strcpy(buf[i], buf[i+1]);
+                        }
+                        if(top_menu_element+max_onscreen_items-1 < max_lines){
+                            (*index_to_option)(buf[max_onscreen_items-1] + strlen(CONFIG_MENU8G2_INDICATOR),
+                                    CONFIG_MENU8G2_LINE_BUFFER_LEN - strlen(CONFIG_MENU8G2_INDICATOR),
+                                    meta, top_menu_element + max_onscreen_items -1);
+                        }
+                        else{
+                            for(int k=0; k<strlen(CONFIG_MENU8G2_INDICATOR); k++){
+                                buf[max_onscreen_items-1][k] = ' ';
+                            }
+                            buf[max_onscreen_items-1][strlen(CONFIG_MENU8G2_INDICATOR)] = '\0';
+                        }
+                    }
                 }
 			}
 			else if(input_buf & (0x01 << EASY_INPUT_ENTER)){
-                return true;
+                outcome = true;
+                goto exit;
 			}
 		}
 	}
-	return false; // should never reach here, but just in case
+    exit:
+        for ( uint8_t i = 0; i < max_onscreen_items; i++ ){
+            free(buf[i]);
+        }
+        free(buf);
+        return outcome;
 }
 
 static menu8g2_err_t linear_string_selector(char buf[], const size_t buf_len, 
