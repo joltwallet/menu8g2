@@ -94,9 +94,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
     /* Plotting Variables */
     uint8_t element_y_pos; // variable for element positioning
     int32_t top_menu_element, old_top_menu_element;
-    uint8_t j;
-    //char buf[CONFIG_MENU8G2_LINE_BUFFER_LEN]; // buffer for printing strings
-	uint8_t input_buf; // holds the incoming button presses
+	uint64_t input_buf; // holds the incoming button presses
 
     u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
     item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + CONFIG_MENU8G2_BORDER_SIZE;
@@ -119,7 +117,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
     // Populate buffer
     for(uint8_t i=0; i<max_onscreen_items; i++){
         // Add the cursor to the buffer
-        j = top_menu_element + i;
+        uint8_t j = top_menu_element + i;
         if(j >= max_lines){
             break; // No more options to display
         }
@@ -145,7 +143,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
             menu8g2_buf_header(menu, title);
 
             for(uint8_t i=0; i<max_onscreen_items; i++){
-                j = old_top_menu_element + i;
+                uint8_t j = old_top_menu_element + i;
                 element_y_pos += item_height + CONFIG_MENU8G2_BORDER_SIZE;
                 u8g2_DrawStr(menu->u8g2, CONFIG_MENU8G2_BORDER_SIZE, element_y_pos, buf[i]);
                 if(j == menu->index){
@@ -156,11 +154,11 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
 
         // Block until user inputs a button
 		if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
-			if(input_buf & (0x01 << EASY_INPUT_BACK)){
+			if(input_buf & (1ULL << EASY_INPUT_BACK)){
                 outcome = false;
                 goto exit;
 			}
-			else if(input_buf & (0x01 << EASY_INPUT_UP)){
+			else if(input_buf & (1ULL << EASY_INPUT_UP)){
                 if(menu->index > 0){
                     menu->index--;
                     top_menu_element = menu->index - (max_onscreen_items / 2);
@@ -169,7 +167,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                     }
                     if(old_top_menu_element != top_menu_element){
                         for(uint8_t i=max_onscreen_items-1; i>0; i--){
-                            strcpy(buf[i], buf[i-1]);
+                            strlcpy(buf[i], buf[i-1], CONFIG_MENU8G2_LINE_BUFFER_LEN);
                         }
                         (*index_to_option)(buf[0] + strlen(CONFIG_MENU8G2_INDICATOR),
                                 CONFIG_MENU8G2_LINE_BUFFER_LEN - strlen(CONFIG_MENU8G2_INDICATOR),
@@ -177,7 +175,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                     }
                 }
 			}
-			else if(input_buf & (0x01 << EASY_INPUT_DOWN)){
+			else if(input_buf & (1ULL << EASY_INPUT_DOWN)){
                 if(menu->index < max_lines - 1){
                     menu->index++;
                     top_menu_element = menu->index - (max_onscreen_items / 2);
@@ -202,7 +200,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                     }
                 }
 			}
-			else if(input_buf & (0x01 << EASY_INPUT_ENTER)){
+			else if(input_buf & (1ULL << EASY_INPUT_ENTER)){
                 outcome = true;
                 goto exit;
 			}
