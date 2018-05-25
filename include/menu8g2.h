@@ -53,7 +53,7 @@ void menu8g2_init(menu8g2_t *menu,
         void (*pre_draw)(menu8g2_t *menu),
         void (*post_draw)(menu8g2_t *menu)
         );
-void menu8g2_copy(menu8g2_t *menu, menu8g2_t *old);
+void menu8g2_copy(menu8g2_t *menu, const menu8g2_t *old);
 
 /* Change the menu's index (default starting value of 0 */
 menu8g2_err_t menu8g2_set_index(menu8g2_t *menu, const uint32_t index);

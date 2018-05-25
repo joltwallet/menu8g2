@@ -25,7 +25,7 @@ void menu8g2_init(menu8g2_t *menu, u8g2_t *u8g2,
     menu->post_draw = post_draw;
 }
 
-void menu8g2_copy(menu8g2_t *new, menu8g2_t *old){
+void menu8g2_copy(menu8g2_t *new, const menu8g2_t *old){
     /* Copies everything except index */
     new->u8g2 = old->u8g2;
     new->input_queue = old->input_queue;
