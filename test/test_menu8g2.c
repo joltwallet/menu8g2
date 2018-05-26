@@ -19,6 +19,10 @@ bool display_initialized = false;
 
 #define NUM_OF(x) (sizeof (x) / sizeof (*x))
 
+static const char *LONG_STRING = 
+            "This is quite a long string, you'll have to scroll to see "
+            "the entire thing. But at least that means that scrolling works!";
+
 /* Configure this to your test screen to see results */
 static void setup_screen(u8g2_t *u8g2){
     if (display_initialized){
@@ -295,6 +299,28 @@ TEST_CASE("Element Menu", "[menu8g2]"){
     menu8g2_elements_free(&elements);
 
     printf("Menu exited by pressing BACK.\n");
+
+    vSemaphoreDelete(disp_mutex);
+    vTaskDelete(h_push_button);
+}
+
+TEST_CASE("Text Title", "[menu8g2]"){
+    setup_screen(&u8g2);
+    QueueHandle_t input_queue;
+    easy_input_queue_init(&input_queue);
+    TaskHandle_t h_push_button = NULL;
+    xTaskCreate(easy_input_push_button_task, \
+            "ButtonDebounce", 2048,
+            (void *)&input_queue, 20, \
+            &h_push_button);
+
+    const char title[] = "Text Title";
+
+    menu8g2_t menu;
+    SemaphoreHandle_t disp_mutex = xSemaphoreCreateMutex();
+    menu8g2_init(&menu, &u8g2, input_queue, disp_mutex, NULL, NULL);
+
+    menu8g2_display_text_title(&menu, LONG_STRING, title);
 
     vSemaphoreDelete(disp_mutex);
     vTaskDelete(h_push_button);

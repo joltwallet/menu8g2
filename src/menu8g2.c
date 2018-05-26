@@ -248,24 +248,47 @@ uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const cha
     uint16_t n_lines = 1 + ((str_len - 1) / CHAR_PER_LINE_WRAP);
     char buf[CHAR_PER_LINE_WRAP+1];
 
-    MENU8G2_BEGIN_DRAW(menu)
-        uint16_t y_pos = item_height;
-        if(title){
-            y_pos += menu8g2_buf_header(menu, title);
-        }
-
-        for(int i=0; i<n_lines; i++){
-            strlcpy(buf, text+i*CHAR_PER_LINE_WRAP, sizeof(buf));
-            buf[CHAR_PER_LINE_WRAP] = '\0';
-            u8g2_DrawStr(menu->u8g2, 0, y_pos, buf);
-            y_pos += item_height;
-        }
-    MENU8G2_END_DRAW(menu)
-
-    // Block until user inputs a button
+    uint16_t line_start = 0;
     for(;;){
+        uint16_t y_pos = item_height;
+        bool more_text = false;
+        MENU8G2_BEGIN_DRAW(menu)
+            uint16_t header_height = 0; 
+            if(title){
+                header_height = menu8g2_buf_header(menu, title);
+                y_pos += header_height;
+            }
+
+            for(int i=line_start; i<n_lines; i++){
+                strlcpy(buf, text+i*CHAR_PER_LINE_WRAP, sizeof(buf));
+                buf[CHAR_PER_LINE_WRAP] = '\0';
+                u8g2_DrawStr(menu->u8g2, 0, y_pos, buf);
+                y_pos += item_height;
+                if(y_pos >= u8g2_GetDisplayHeight(menu->u8g2) + item_height){
+                    more_text = true;
+                    break;
+                }
+                else{
+                    more_text = false;
+                }
+            }
+        MENU8G2_END_DRAW(menu)
+
+        // Block until user inputs a button
         if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
-            return input_buf;
+            if(input_buf & (1ULL << EASY_INPUT_UP)){
+                if( line_start > 0 ){
+                    line_start--;
+                }
+            }
+            else if(input_buf & (1ULL << EASY_INPUT_DOWN)){
+                if( more_text ){
+                    line_start++;
+                }
+            }
+            else {
+                return input_buf;
+            }
         }
     }
     return 0; // Should never get here
