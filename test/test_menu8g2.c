@@ -20,8 +20,10 @@ bool display_initialized = false;
 #define NUM_OF(x) (sizeof (x) / sizeof (*x))
 
 static const char *LONG_STRING = 
-            "This is quite a long string, you'll have to scroll to see "
-            "the entire thing. But at least that means that scrolling works!";
+            "This is \nquite a long string, you'll have to scroll to see "
+            "the entire thing. But at least that means that scrolling works!"
+            //" xrb_1d6yjscy8th55f1bbfy4ryp6c3m44f3d8m73q1bw349i4jyk53tmn36pskju"
+            ;
 
 /* Configure this to your test screen to see results */
 static void setup_screen(u8g2_t *u8g2){

@@ -243,35 +243,26 @@ uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const cha
 
     u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
     item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + CONFIG_MENU8G2_BORDER_SIZE;
-
+    uint16_t char_per_line = u8g2_GetDisplayWidth(menu->u8g2) / u8g2_GetMaxCharWidth(menu->u8g2);
     uint16_t str_len = strlen(text);
-    uint16_t n_lines = 1 + ((str_len - 1) / CHAR_PER_LINE_WRAP);
-    char buf[CHAR_PER_LINE_WRAP+1];
+    uint16_t n_lines = 1 + ((str_len - 1) / char_per_line);
+
+    char *buf = calloc(strlen(text) + n_lines + 1, sizeof(char));
+    word_wrap(buf, text, char_per_line);
 
     uint16_t line_start = 0;
     for(;;){
         uint16_t y_pos = item_height;
         bool more_text = false;
-        MENU8G2_BEGIN_DRAW(menu)
-            uint16_t header_height = 0; 
-            if(title){
-                header_height = menu8g2_buf_header(menu, title);
-                y_pos += header_height;
-            }
+        uint16_t header_height = 0; 
+        if(title){
+            header_height = menu8g2_buf_header(menu, title);
+            y_pos += header_height;
+        }
 
-            for(int i=line_start; i<n_lines; i++){
-                strlcpy(buf, text+i*CHAR_PER_LINE_WRAP, sizeof(buf));
-                buf[CHAR_PER_LINE_WRAP] = '\0';
-                u8g2_DrawStr(menu->u8g2, 0, y_pos, buf);
-                y_pos += item_height;
-                if(y_pos >= u8g2_GetDisplayHeight(menu->u8g2) + item_height){
-                    more_text = true;
-                    break;
-                }
-                else{
-                    more_text = false;
-                }
-            }
+        MENU8G2_BEGIN_DRAW(menu)
+            menu8g2_buf_header(menu, title);
+            more_text = menu8g2_draw_str(menu, 0, y_pos, buf, line_start);
         MENU8G2_END_DRAW(menu)
 
         // Block until user inputs a button
@@ -287,6 +278,7 @@ uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const cha
                 }
             }
             else {
+                free( buf );
                 return input_buf;
             }
         }
