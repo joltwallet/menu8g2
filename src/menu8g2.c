@@ -238,18 +238,17 @@ uint64_t menu8g2_display_text(menu8g2_t *menu, const char *text){
 
 uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const char *title){
     /* Wraps text to fit on the dispaly; need to add scrolling */
-    uint8_t item_height; // Height of a menu item
-	uint64_t input_buf; // holds the incoming button presses
-
     u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
-    item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + CONFIG_MENU8G2_BORDER_SIZE;
-    uint16_t char_per_line = u8g2_GetDisplayWidth(menu->u8g2) / u8g2_GetMaxCharWidth(menu->u8g2);
-    uint16_t str_len = strlen(text);
-    uint16_t n_lines = 1 + ((str_len - 1) / char_per_line);
+    uint8_t item_height = u8g2_GetAscent(menu->u8g2) 
+            - u8g2_GetDescent(menu->u8g2) 
+            + CONFIG_MENU8G2_BORDER_SIZE;
+    uint16_t char_per_line = u8g2_GetDisplayWidth(menu->u8g2) 
+            / u8g2_GetMaxCharWidth(menu->u8g2);
 
-    size_t buf_len = strlen(text) + n_lines + 1 + 100; // todo: fix this
+    size_t buf_len;
+    word_wrap(NULL, &buf_len, text, char_per_line);
     char *buf = calloc(buf_len, sizeof(char));
-    word_wrap(buf, buf_len, text, char_per_line);
+    word_wrap(buf, &buf_len, text, char_per_line);
 
     uint16_t line_start = 0;
     for(;;){
@@ -267,6 +266,7 @@ uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const cha
         MENU8G2_END_DRAW(menu)
 
         // Block until user inputs a button
+	    uint64_t input_buf;
         if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
             if(input_buf & (1ULL << EASY_INPUT_UP)){
                 if( line_start > 0 ){
