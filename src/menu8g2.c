@@ -247,8 +247,9 @@ uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const cha
     uint16_t str_len = strlen(text);
     uint16_t n_lines = 1 + ((str_len - 1) / char_per_line);
 
-    char *buf = calloc(strlen(text) + n_lines + 1, sizeof(char));
-    word_wrap(buf, text, char_per_line);
+    size_t buf_len = strlen(text) + n_lines + 1 + 100; // todo: fix this
+    char *buf = calloc(buf_len, sizeof(char));
+    word_wrap(buf, buf_len, text, char_per_line);
 
     uint16_t line_start = 0;
     for(;;){

@@ -47,7 +47,7 @@ bool menu8g2_draw_str(menu8g2_t *menu, const uint16_t x, const uint16_t y, const
     return more_text;
 }
  
-char *word_wrap(char* buffer, char* string, int line_width) {
+char *word_wrap(char* buffer, size_t buf_len, char* string, int line_width) {
 	/*
 		This function was derived from a snipped submitted by Sean Hubbard
         on 2012-01-22
@@ -59,50 +59,52 @@ char *word_wrap(char* buffer, char* string, int line_width) {
 		backtrack along the string until white space is found.
 	*/
 
-    uint32_t i = 0;
+    uint32_t i = 0, j = 0;
+    uint32_t last_space = 0;
  
-    while(i < strlen( string ) ) 
-    {
+    while(i < strlen( string ) ) {
         // copy string until the end of the line is reached
-        for ( uint32_t counter = 1; counter <= line_width; counter++ ) 
-        {
+        for ( uint32_t x = 0; x < line_width; x++, i++, j++ ) {
             // check if end of string reached
-            if ( i == strlen( string ) ) 
-            {
-                buffer[ i ] = 0;
+            if ( i == strlen( string ) ) {
+                buffer[ j ] = 0;
                 return buffer;
             }
-            buffer[ i ] = string[ i ];
-            // check for newlines embedded in the original input 
-            // and reset the index
-            if ( buffer[ i ] == '\n' )
-            {
-                counter = 1; 
+            buffer[ j ] = string[ i ];
+            // check for newlines embedded in original input and reset the index
+            if ( buffer[ j ] == '\n' ) {
+                x = 0; 
             }
-            i++;
         }
         // check for whitespace
-        if ( ' ' == string[ i ] ) 
-        {
-            buffer[i] = '\n';
-            i++;
+        if ( ' ' == buffer[ j ] ) {
+            buffer[j] = '\n';
+            i++, j++;
         } 
-        else
-        {
-            // check for nearest whitespace back in string
-            for ( uint32_t k = i; k > 0; k--) 
-            {
-                if ( ' ' == string[ k ] ) 
-                {
-                    buffer[ k ] = '\n';
-                    // set string index back to character after this one
-                    i = k + 1;
+        else {
+            // check for nearest whitespace back in string and replace it with
+            // a '\n'
+            for ( uint32_t k = i; k > 0; k--) {
+                if ( ' ' == string[ k ] ) {
+                    if ( last_space == k ) {
+                        // We've been here before, we have to break up this
+                        // long word
+                        buffer[ j-1 ] = '\n';
+                        i--;
+                    }
+                    else {
+                        j -= (i-k);
+                        buffer[ j ] = '\n';
+                        j++;
+                        last_space = k;
+                        i = last_space + 1;
+                    }
                     break;
                 }
             }
         }
     }
-    buffer[ i ] = 0;
+    buffer[ j ] = 0;
  
     return buffer;
 }

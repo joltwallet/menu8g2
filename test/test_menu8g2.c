@@ -20,9 +20,9 @@ bool display_initialized = false;
 #define NUM_OF(x) (sizeof (x) / sizeof (*x))
 
 static const char *LONG_STRING = 
-            "This is \nquite a long string, you'll have to scroll to see "
-            "the entire thing. But at least that means that scrolling works!"
-            //" xrb_1d6yjscy8th55f1bbfy4ryp6c3m44f3d8m73q1bw349i4jyk53tmn36pskju"
+            "This is\nquite a long string, you'll have to scroll to see "
+            "the entire thing. But at least that means that scrolling works! "
+            "abcdefghijklmnopqrstuvwxyz1234567890-abcdefghijklmnopqrstuvwxyz1234567890"
             ;
 
 /* Configure this to your test screen to see results */
