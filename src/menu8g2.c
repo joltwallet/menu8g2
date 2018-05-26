@@ -64,7 +64,7 @@ uint8_t menu8g2_buf_header(menu8g2_t *menu, const char *title){
             + CONFIG_MENU8G2_BORDER_SIZE;
 
     #if CONFIG_MENU8G2_HEADER_CENTER_JUST
-    u8g2_DrawStr(menu->u8g2, get_center_x(menu->u8g2, title), title_height,
+    u8g2_DrawStr(menu->u8g2, menu8g2_get_center_x(menu, title), title_height,
             title);
     #endif
     #if CONFIG_MENU8G2_HEADER_LEFT_JUST
@@ -246,9 +246,9 @@ uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const cha
             / u8g2_GetMaxCharWidth(menu->u8g2);
 
     size_t buf_len;
-    word_wrap(NULL, &buf_len, text, char_per_line);
+    menu8g2_word_wrap(NULL, &buf_len, text, char_per_line);
     char *buf = calloc(buf_len, sizeof(char));
-    word_wrap(buf, &buf_len, text, char_per_line);
+    menu8g2_word_wrap(buf, &buf_len, text, char_per_line);
 
     uint16_t line_start = 0;
     for(;;){

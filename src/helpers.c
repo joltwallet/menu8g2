@@ -7,10 +7,10 @@
 #include "menu8g2.h"
 #include "helpers.h"
 
-uint8_t get_center_x(u8g2_t *u8g2, const char *text){
+uint8_t menu8g2_get_center_x(menu8g2_t *menu, const char *text){
     // Computes X position to print text in center of screen
-    u8g2_uint_t width = u8g2_GetStrWidth(u8g2, text);
-    return (u8g2_GetDisplayWidth(u8g2)-width)/2 ;
+    u8g2_uint_t width = u8g2_GetStrWidth(menu->u8g2, text);
+    return (u8g2_GetDisplayWidth(menu->u8g2)-width)/2 ;
 }
 
 bool menu8g2_draw_str(menu8g2_t *menu, const uint16_t x, const uint16_t y, const char *str, const uint16_t line_start){
@@ -47,7 +47,7 @@ bool menu8g2_draw_str(menu8g2_t *menu, const uint16_t x, const uint16_t y, const
     return more_text;
 }
  
-char *word_wrap(char* buffer, size_t *buf_len, char* string, int line_width) {
+char *menu8g2_word_wrap(char* buffer, size_t *buf_len, char* string, int line_width) {
 	/*
 		This function was derived from a snipped submitted by Sean Hubbard
         on 2012-01-22
