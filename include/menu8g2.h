@@ -9,8 +9,6 @@
 #include "freertos/task.h"
 #include "easy_input.h"
 
-#define CHAR_PER_LINE_WRAP 20
-
 typedef enum menu8g2_err_t{
     MENU8G2_SUCCESS=0,
     MENU8G2_FAILURE
