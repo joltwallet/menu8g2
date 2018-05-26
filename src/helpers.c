@@ -90,7 +90,8 @@ char *menu8g2_word_wrap(char* buffer, size_t *buf_len, const char* string, const
         else {
             // check for nearest whitespace back in string and replace it with
             // a '\n'
-            for ( uint32_t k = i; k > 0; k--) {
+            uint32_t k;
+            for ( k=i ; k > 0; k--) {
                 if ( ' ' == string[ k ] ) {
                     if ( last_space == k ) {
                         // We've been here before, we have to break up this
@@ -111,6 +112,12 @@ char *menu8g2_word_wrap(char* buffer, size_t *buf_len, const char* string, const
                     }
                     break;
                 }
+            }
+            if( k == 0 ){
+                if( buffer ) {
+                    buffer[ j-1 ] = '\n';
+                }
+                i--;
             }
         }
     }
