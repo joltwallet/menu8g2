@@ -59,13 +59,12 @@ char *word_wrap(char* buffer, char* string, int line_width) {
 		backtrack along the string until white space is found.
 	*/
 
-    int i = 0;
-    int k, counter;
+    uint32_t i = 0;
  
     while(i < strlen( string ) ) 
     {
         // copy string until the end of the line is reached
-        for ( counter = 1; counter <= line_width; counter++ ) 
+        for ( uint32_t counter = 1; counter <= line_width; counter++ ) 
         {
             // check if end of string reached
             if ( i == strlen( string ) ) 
@@ -91,7 +90,7 @@ char *word_wrap(char* buffer, char* string, int line_width) {
         else
         {
             // check for nearest whitespace back in string
-            for ( k = i; k > 0; k--) 
+            for ( uint32_t k = i; k > 0; k--) 
             {
                 if ( ' ' == string[ k ] ) 
                 {
