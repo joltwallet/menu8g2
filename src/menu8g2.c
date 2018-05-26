@@ -72,6 +72,7 @@ uint8_t menu8g2_buf_header(menu8g2_t *menu, const char *title){
             title);
     #endif
 
+    title_height += 1;
     u8g2_DrawHLine(menu->u8g2, 0, title_height, u8g2_GetDisplayWidth(menu->u8g2));
     return title_height;
 }
