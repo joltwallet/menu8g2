@@ -117,10 +117,10 @@ char *menu8g2_word_wrap(char* buffer, size_t *buf_len, char* string, int line_wi
 
     exit:
         if( buffer ){
-            buffer[ j ] = 0;
+            buffer[ j ] = '\0';
         }
         if( buf_len ){
-            *buf_len = j;
+            *buf_len = j + 1;
         }
      
         return buffer;
