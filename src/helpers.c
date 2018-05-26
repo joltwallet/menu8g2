@@ -47,7 +47,7 @@ bool menu8g2_draw_str(menu8g2_t *menu, const uint16_t x, const uint16_t y, const
     return more_text;
 }
  
-char *menu8g2_word_wrap(char* buffer, size_t *buf_len, char* string, int line_width) {
+char *menu8g2_word_wrap(char* buffer, size_t *buf_len, const char* string, const int line_width) {
 	/*
 		This function was derived from a snipped submitted by Sean Hubbard
         on 2012-01-22
