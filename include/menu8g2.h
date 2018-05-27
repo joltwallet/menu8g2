@@ -97,15 +97,30 @@ menu8g2_err_t menu_task(menu8g2_t *menu); // Not yet implemented
 
 /* Drawing Buffer Wrappers */
 // Used to wrap drawing loop, handle mutexs, and pre/post draw functions
-#define MENU8G2_BEGIN_DRAW(menu) \
-    xSemaphoreTake((menu)->disp_mutex, portMAX_DELAY); \
-    u8g2_FirstPage((menu)->u8g2); \
-    do { \
-        if((menu)->pre_draw) (menu)->pre_draw(menu);
+#if CONFIG_MENU8G2_BUFFER_FULL
+    #define MENU8G2_BEGIN_DRAW(menu) \
+        xSemaphoreTake((menu)->disp_mutex, portMAX_DELAY); \
+        u8g2_ClearBuffer((menu)->u8g2); \
+        {
+    #define MENU8G2_END_DRAW(menu) \
+            if((menu)->post_draw) (menu)->post_draw(menu); \
+        } \
+        u8g2_SendBuffer((menu)->u8g2); \
+        xSemaphoreGive((menu)->disp_mutex);
 
-#define MENU8G2_END_DRAW(menu) \
-        if((menu)->post_draw) (menu)->post_draw(menu); \
-    } while(u8g2_NextPage((menu)->u8g2)); \
-    xSemaphoreGive((menu)->disp_mutex);
+#endif
+
+#if CONFIG_MENU8G2_BUFFER_PAGE
+    #define MENU8G2_BEGIN_DRAW(menu) \
+            xSemaphoreTake((menu)->disp_mutex, portMAX_DELAY); \
+            u8g2_FirstPage((menu)->u8g2); \
+            do { \
+                if((menu)->pre_draw) (menu)->pre_draw(menu);
+    #define MENU8G2_END_DRAW(menu) \
+                if((menu)->post_draw) (menu)->post_draw(menu); \
+            } while(u8g2_NextPage((menu)->u8g2)); \
+            xSemaphoreGive((menu)->disp_mutex);
+#endif
+
 
 #endif

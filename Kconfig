@@ -27,4 +27,12 @@ menu "Menu8g2 Config"
             bool "Header String is Left Justified"
     endchoice
 
+    choice
+        prompt "Select U8G2 Buffer Method"
+        config MENU8G2_BUFFER_FULL
+            bool "Full Buffer Method (fast, high ram, allows screen saves)"
+        config MENU8G2_BUFFER_PAGE
+            bool "Paged Buffer (slow, low ram, no screen saves)"
+    endchoice
+
 endmenu
