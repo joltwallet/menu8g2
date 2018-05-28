@@ -95,7 +95,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
     /* Plotting Variables */
     uint8_t element_y_pos; // variable for element positioning
     int32_t top_menu_element, old_top_menu_element;
-	uint64_t input_buf; // holds the incoming button presses
+    uint64_t input_buf; // holds the incoming button presses
 
     u8g2_SetFont(menu->u8g2, u8g2_font_profont12_tf);
     item_height = u8g2_GetAscent(menu->u8g2) - u8g2_GetDescent(menu->u8g2) + CONFIG_MENU8G2_BORDER_SIZE;
@@ -133,7 +133,7 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                 meta, j);
     }
 
-	for(;;){
+    for(;;){
         old_top_menu_element = menu->index - (max_onscreen_items / 2);
         if(old_top_menu_element < 0){
             old_top_menu_element = 0;
@@ -154,12 +154,12 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
         MENU8G2_END_DRAW(menu)
 
         // Block until user inputs a button
-		if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
-			if(input_buf & (1ULL << EASY_INPUT_BACK)){
+        if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
+            if(input_buf & (1ULL << EASY_INPUT_BACK)){
                 outcome = false;
                 goto exit;
-			}
-			else if(input_buf & (1ULL << EASY_INPUT_UP)){
+            }
+            else if(input_buf & (1ULL << EASY_INPUT_UP)){
                 if(menu->index > 0){
                     menu->index--;
                     top_menu_element = menu->index - (max_onscreen_items / 2);
@@ -175,8 +175,8 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                                 meta, top_menu_element);
                     }
                 }
-			}
-			else if(input_buf & (1ULL << EASY_INPUT_DOWN)){
+            }
+            else if(input_buf & (1ULL << EASY_INPUT_DOWN)){
                 if(menu->index < max_lines - 1){
                     menu->index++;
                     top_menu_element = menu->index - (max_onscreen_items / 2);
@@ -200,13 +200,13 @@ bool menu8g2_create_vertical_menu(menu8g2_t *menu,
                         }
                     }
                 }
-			}
-			else if(input_buf & (1ULL << EASY_INPUT_ENTER)){
+            }
+            else if(input_buf & (1ULL << EASY_INPUT_ENTER)){
                 outcome = true;
                 goto exit;
-			}
-		}
-	}
+            }
+        }
+    }
     exit:
         for ( uint8_t i = 0; i < max_onscreen_items; i++ ){
             free(buf[i]);
@@ -267,7 +267,7 @@ uint64_t menu8g2_display_text_title(menu8g2_t *menu, const char *text, const cha
         MENU8G2_END_DRAW(menu)
 
         // Block until user inputs a button
-	    uint64_t input_buf;
+        uint64_t input_buf;
         if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
             if(input_buf & (1ULL << EASY_INPUT_UP)){
                 if( line_start > 0 ){
@@ -300,7 +300,7 @@ void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
     int8_t top_menu_element;
     uint8_t j;
     char buf[CONFIG_MENU8G2_LINE_BUFFER_LEN]; // buffer for printing strings
-	uint8_t input_buf; // holds the incoming button presses
+    uint8_t input_buf; // holds the incoming button presses
 
     assert(strlen(CONFIG_MENU8G2_INDICATOR) < sizeof(buf));
 
@@ -313,7 +313,7 @@ void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
     max_onscreen_items = (u8g2_GetDisplayHeight(menu->u8g2) - base_height)
             / (item_height+CONFIG_MENU8G2_BORDER_SIZE);
 
-	for(;;){
+    for(;;){
         MENU8G2_BEGIN_DRAW(menu)
             menu8g2_buf_header(menu, title);
 
@@ -346,27 +346,27 @@ void menu8g2_create_vertical_element_menu(menu8g2_t *menu,
         MENU8G2_END_DRAW(menu)
 
         // Block until user inputs a button
-		if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
-			if(input_buf & (0x01 << EASY_INPUT_BACK)){
+        if(xQueueReceive(menu->input_queue, &input_buf, portMAX_DELAY)) {
+            if(input_buf & (0x01 << EASY_INPUT_BACK)){
                 return;
-			}
-			else if(input_buf & (0x01 << EASY_INPUT_UP)){
+            }
+            else if(input_buf & (0x01 << EASY_INPUT_UP)){
                 if(menu->index > 0){
                     menu->index--;
                 }
-			}
-			else if(input_buf & (0x01 << EASY_INPUT_DOWN)){
+            }
+            else if(input_buf & (0x01 << EASY_INPUT_DOWN)){
                 if(menu->index < elements->n - 1){
                     menu->index++;
                 }
-			}
-			else if(input_buf & (0x01 << EASY_INPUT_ENTER)){
+            }
+            else if(input_buf & (0x01 << EASY_INPUT_ENTER)){
                 if((elements->elements)[menu->index].menu_h){
                     (elements->elements)[menu->index].menu_h(menu);
                 }
-			}
-		}
-	}
+            }
+        }
+    }
 }
 
 void menu8g2_set_element(menu8g2_elements_t *elements, char *name, void *func){

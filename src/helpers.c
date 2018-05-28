@@ -48,19 +48,19 @@ bool menu8g2_draw_str(menu8g2_t *menu, const uint16_t x, const uint16_t y, const
 }
  
 char *menu8g2_word_wrap(char* buffer, size_t *buf_len, const char* string, const int line_width) {
-	/*
-		This function was derived from a snipped submitted by Sean Hubbard
+    /*
+        This function was derived from a snipped submitted by Sean Hubbard
         on 2012-01-22
-		https://www.cprogramming.com/snippets/source-code/word-wrap-in-c
+        https://www.cprogramming.com/snippets/source-code/word-wrap-in-c
 
         Sets buf_len to the length that the buffer would need to be.
         buffer can be null to just compute buf_len.
-	 
-		This function takes a string and an output buffer and a desired width. It then copies 
-		the string to the buffer, inserting a new line character when a certain line
-		length is reached.  If the end of the line is in the middle of a word, it will
-		backtrack along the string until white space is found.
-	*/
+     
+        This function takes a string and an output buffer and a desired width. It then copies 
+        the string to the buffer, inserting a new line character when a certain line
+        length is reached.  If the end of the line is in the middle of a word, it will
+        backtrack along the string until white space is found.
+    */
 
     uint32_t i = 0, j = 0;
     uint32_t last_space = 0;
