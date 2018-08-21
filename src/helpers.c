@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include "u8g2.h"
 #include "menu8g2.h"
-#include "helpers.h"
 
 uint8_t menu8g2_get_center_x(menu8g2_t *menu, const char *text){
     // Computes X position to print text in center of screen

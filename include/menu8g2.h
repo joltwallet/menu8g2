@@ -27,20 +27,17 @@
 #include "freertos/task.h"
 #include "easy_input.h"
 
-#include "helpers.h"
-
 typedef enum menu8g2_err_t{
     MENU8G2_SUCCESS=0,
     MENU8G2_FAILURE
 } menu8g2_err_t;
 
-
 //typedef struct menu8g2_t menu8g2_t;
 typedef struct menu8g2_t{
     uint32_t index;
-    QueueHandle_t *input_queue;
+    QueueHandle_t input_queue;
     u8g2_t *u8g2;
-    SemaphoreHandle_t *disp_mutex;
+    SemaphoreHandle_t disp_mutex;
     void (*pre_draw)(struct menu8g2_t *);
     void (*post_draw)(struct menu8g2_t *);
 } menu8g2_t;
@@ -57,6 +54,9 @@ typedef struct menu8g2_elements_t{
     struct menu8g2_element_t *elements;
 } menu8g2_elements_t;
 
+uint8_t menu8g2_get_center_x(struct menu8g2_t *menu, const char *text);
+bool menu8g2_draw_str(struct menu8g2_t *menu, const uint16_t x, const uint16_t y, const char *str, const uint16_t line_start);
+char *menu8g2_word_wrap(char* buffer, size_t *buf_len, const char* string, const int line_width);
 
 /* Allocate memory for menu8g2_t object and set display object
  * menu - menu object to initializie
@@ -77,8 +77,8 @@ void menu8g2_copy(menu8g2_t *menu, const menu8g2_t *old);
 menu8g2_err_t menu8g2_set_index(menu8g2_t *menu, const uint32_t index);
 uint32_t menu8g2_get_index(menu8g2_t *menu);
 
-QueueHandle_t *menu8g2_get_input_queue(menu8g2_t *menu);
-SemaphoreHandle_t *menu8g2_get_disp_mutex(menu8g2_t *menu);
+QueueHandle_t menu8g2_get_input_queue(menu8g2_t *menu);
+SemaphoreHandle_t menu8g2_get_disp_mutex(menu8g2_t *menu);
 
 u8g2_t *menu8g2_get_u8g2(menu8g2_t *menu);
 

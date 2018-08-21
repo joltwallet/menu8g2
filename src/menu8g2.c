@@ -26,7 +26,6 @@
 #include "u8g2.h"
 #include "menu8g2.h"
 #include "easy_input.h"
-#include "helpers.h"
 
 
 void menu8g2_init(menu8g2_t *menu, u8g2_t *u8g2,
@@ -62,11 +61,11 @@ uint32_t menu8g2_get_index(menu8g2_t *menu){
     return menu->index;
 }
 
-QueueHandle_t *menu8g2_get_input_queue(menu8g2_t *menu){
+QueueHandle_t menu8g2_get_input_queue(menu8g2_t *menu){
     return menu->input_queue;
 }
 
-SemaphoreHandle_t *menu8g2_get_disp_mutex(menu8g2_t *menu){
+SemaphoreHandle_t menu8g2_get_disp_mutex(menu8g2_t *menu){
     return menu->disp_mutex;
 }
 
